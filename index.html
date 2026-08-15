@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>סַהֲרָה - להכיר את עצמך</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#A4643E">
+<link rel="icon" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="סַהֲרָה">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Suez+One&family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+  :root{
+    --terracotta:#A4643E;
+    --terracotta-dark:#7E4E30;
+    --cream:#FFF8EA;
+    --cream-warm:#FBF1DC;
+    --ink:#2E2118;
+    --ink-soft:#6B5A48;
+    --line:#D9C3A6;
+    --sage:#7C8F6E;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{ height:100%; }
+  body{
+    font-family:'Heebo', sans-serif;
+    background: radial-gradient(circle at 30% 10%, #B57A50 0%, var(--terracotta) 45%, var(--terracotta-dark) 100%);
+    color: var(--cream);
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  .app{ max-width: 620px; margin:0 auto; min-height:100vh; display:flex; flex-direction:column; padding: 28px 20px 40px; position:relative; }
+
+  /* ---------- shared ---------- */
+  .brandmark{ display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom: 6px; }
+  .brandmark svg{ width:22px; height:22px; }
+  .brandmark span{ font-family:'Heebo'; font-weight:700; font-size:13px; letter-spacing:0.18em; opacity:0.85; }
+  h1.title{ font-family:'Suez One', serif; font-size:40px; text-align:center; line-height:1.2; margin: 10px 0 8px; }
+  .tagline{ text-align:center; font-size:14.5px; color:var(--cream); opacity:0.85; max-width:420px; margin:0 auto; line-height:1.7;}
+
+  .btn{
+    font-family:'Heebo'; font-weight:700; font-size:15px; border:none; border-radius:14px;
+    padding: 15px 22px; cursor:pointer; transition: transform 0.15s, opacity 0.15s;
+    text-decoration:none; display:inline-block;
+  }
+  .btn:active{ transform: scale(0.97); }
+  .btn-primary{ background: var(--cream); color: var(--terracotta-dark); }
+  .btn-primary:hover{ opacity:0.92; }
+  .btn-ghost{ background: rgba(255,248,234,0.12); color: var(--cream); border:1px solid rgba(255,248,234,0.35); }
+  .btn-ghost:hover{ background: rgba(255,248,234,0.2); }
+  .btn:disabled{ opacity:0.35; cursor:not-allowed; }
+
+  .hidden{ display:none !important; }
+
+  /* ---------- welcome ---------- */
+  #view-welcome{ flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; gap:26px; }
+  .moon-hero{
+    width:76px; height:76px;
+    animation: moonRiseIn 1.3s ease-out, moonFloat 7s ease-in-out 1.3s infinite;
+  }
+  @keyframes moonRiseIn{
+    from{ transform: translateY(46px); opacity:0; }
+    to{ transform: translateY(6px); opacity:0.92; }
+  }
+  @keyframes moonFloat{
+    0%{ transform:translateY(6px); opacity:0.92; }
+    50%{ transform:translateY(-6px); opacity:1; }
+    100%{ transform:translateY(6px); opacity:0.92; }
+  }
+  .welcome-actions{ display:flex; flex-direction:column; gap:12px; width:100%; max-width:280px; margin-top:6px; }
+  .progress-hint{ font-size:12.5px; opacity:0.75; margin-top:2px; }
+
+  /* ---------- menu ---------- */
+  #view-menu{ flex:1; display:flex; flex-direction:column; }
+  .menu-head{ text-align:center; margin-bottom: 22px; }
+  .menu-head h2{ font-family:'Suez One', serif; font-size:26px; margin-bottom:6px; }
+  .overall-bar{ height:6px; border-radius:6px; background:rgba(255,248,234,0.2); margin: 14px auto 0; max-width:280px; overflow:hidden; }
+  .overall-fill{ height:100%; background:var(--cream); border-radius:6px; transition: width 0.4s; }
+  .overall-label{ font-size:12px; opacity:0.75; margin-top:6px; }
+
+  .chapters{ display:flex; flex-direction:column; gap:12px; }
+  .chapter-card{
+    background: rgba(255,248,234,0.1); border:1px solid rgba(255,248,234,0.28);
+    border-radius:16px; padding:16px 18px; cursor:pointer; transition: background 0.15s;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+  }
+  .chapter-card:hover{ background: rgba(255,248,234,0.18); }
+  .chapter-card.suggested{ border-color: var(--cream); box-shadow: 0 0 0 1px var(--cream) inset; }
+  .chapter-moon{ width:32px; height:32px; flex-shrink:0; }
+  .chapter-left{ display:flex; align-items:center; gap:12px; }
+  .chapter-left-text{ display:flex; flex-direction:column; gap:4px; }
+  .chapter-name{ font-family:'Suez One', serif; font-size:19px; }
+  .chapter-meta{ font-size:11.5px; opacity:0.75; }
+  .chapter-badge{
+    font-size:10px; font-weight:700; background:var(--cream); color:var(--terracotta-dark);
+    padding:3px 9px; border-radius:20px; white-space:nowrap;
+  }
+  .chapter-count{ font-family:'Suez One', serif; font-size:22px; opacity:0.9; min-width:52px; text-align:left; }
+  .chapter-count small{ font-family:'Heebo'; font-size:11px; opacity:0.7; display:block; }
+
+  .journal-link{
+    display:block; text-align:center; font-size:12.5px; color:var(--cream); opacity:0.8;
+    text-decoration:underline; margin-top:14px; font-family:'Heebo';
+  }
+  .journal-link:hover{ opacity:1; }
+
+  .story-btn{ margin-top:20px; }
+  .story-hint{ text-align:center; font-size:11.5px; opacity:0.6; margin-top:6px; }
+
+  /* ---------- story ---------- */
+  #view-story{ flex:1; display:flex; flex-direction:column; }
+  .story-content{
+    background: var(--cream); color: var(--ink); border-radius:18px;
+    padding:24px; font-family:'Heebo'; font-size:16px; line-height:1.9;
+    white-space:pre-wrap; margin-top:18px; box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  }
+
+  /* ---------- question ---------- */
+  #view-question{ flex:1; display:flex; flex-direction:column; }
+  .q-top{ display:flex; align-items:center; justify-content:space-between; margin-top: 26px; margin-bottom: 18px; }
+  .q-back{
+    background:none; border:none; color:var(--cream); font-size:14px; cursor:pointer; opacity:0.85; font-family:'Heebo';
+    display:inline-flex; align-items:center; gap:6px; direction:ltr;
+  }
+  .nav-arrow{ display:inline-block; }
+  .q-progress{ font-size:12.5px; opacity:0.8; direction:ltr; }
+  .q-moon-center{ display:flex; justify-content:center; margin-bottom:12px; }
+  .q-moon-center svg{ width:48px; height:48px; display:block; }
+  .q-dots{ display:flex; gap:5px; justify-content:center; margin-bottom:26px; flex-wrap:wrap; }
+  .dot{ width:7px; height:7px; border-radius:50%; background:rgba(255,248,234,0.3); }
+  .dot.done{ background:var(--cream); }
+  .dot.current{ background:var(--cream); transform:scale(1.4); }
+
+  .q-chapter-label{ text-align:center; font-size:12px; letter-spacing:0.12em; opacity:0.7; margin-bottom:10px; text-transform:uppercase;}
+  .q-text{
+    font-family:'Suez One', serif; font-size: 30px; line-height:1.35; text-align:center;
+    margin-bottom: 10px; padding: 0 6px;
+  }
+  .q-helper-hint{
+    font-family:'Heebo'; font-size:13px; line-height:1.5; text-align:center;
+    opacity:0.55; margin-bottom: 18px; padding: 0 12px;
+  }
+  textarea{
+    width:100%; min-height: 220px; flex:1;
+    background: var(--cream); color: var(--ink); border:none; border-radius:18px;
+    padding: 20px; font-family:'Heebo'; font-size:16px; line-height:1.75; resize:vertical;
+    outline: none; box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  }
+  textarea::placeholder{ color: var(--ink-soft); opacity:0.6; }
+
+  .q-nav{ display:flex; gap:10px; margin-top:18px; }
+  .q-nav .btn{ flex:1; display:flex; align-items:center; justify-content:center; gap:8px; direction:ltr; }
+  .save-hint{ text-align:center; font-size:11.5px; opacity:0.6; margin-top:10px; height:14px; }
+
+  @media (max-width:420px){
+    h1.title{ font-size:32px; }
+    .q-text{ font-size:24px; }
+  }
+
+  /* ---------- topbar ---------- */
+  .topbar{ position:absolute; top:16px; left:16px; z-index:5; display:flex; gap:14px; }
+  .signout-btn{ background:none; border:none; color:var(--cream); opacity:0.7; font-size:12px; cursor:pointer; text-decoration:underline; font-family:'Heebo'; }
+  .signout-btn:hover{ opacity:1; }
+  .age-badge{ position:absolute; top:16px; right:16px; z-index:5; font-size:11px; color:var(--cream); opacity:0.6; }
+
+  /* ---------- auth ---------- */
+  #view-auth, #view-gate{ flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:0; text-align:center; }
+  .auth-card{ width:100%; max-width:320px; display:flex; flex-direction:column; gap:12px; margin-top:6px; }
+  .auth-card input{
+    width:100%; background: var(--cream); color: var(--ink); border:none; border-radius:14px;
+    padding: 15px 18px; font-family:'Heebo'; font-size:15px; outline:none; text-align:center;
+  }
+  .auth-card input::placeholder{ color: var(--ink-soft); opacity:0.6; }
+  .auth-error{ color:#FFD6D6; font-size:13px; min-height:16px; }
+  .auth-info{ color:var(--cream); font-size:13px; min-height:16px; opacity:0.9; }
+  .auth-switch-link{
+    background:none; border:none; color:var(--cream); font-size:13px; cursor:pointer; opacity:0.8;
+    text-decoration:underline; font-family:'Heebo'; margin-top:16px;
+  }
+  .auth-switch-link:hover{ opacity:1; }
+  #to-code-link{ margin-top:6px; }
+
+  /* ---------- completion modal ---------- */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(46,33,24,0.7); display:flex;
+    align-items:center; justify-content:center; z-index:50; padding:20px;
+  }
+  .modal-card{
+    background: var(--terracotta-dark); border:1px solid rgba(255,248,234,0.3);
+    border-radius:20px; padding:32px 24px; max-width:340px; width:100%; text-align:center;
+    display:flex; flex-direction:column; gap:14px; box-shadow:0 20px 60px rgba(0,0,0,0.4);
+  }
+  .modal-title{ font-family:'Suez One', serif; font-size:24px; color:var(--cream); }
+  .modal-text{ font-size:14px; color:var(--cream); opacity:0.9; line-height:1.7; }
+  #promo-modal .modal-title{ font-size:19px; white-space:nowrap; }
+  #promo-modal .modal-text{ margin:0; }
+  #about-modal .modal-card{ max-height:85vh; overflow-y:auto; }
+  #about-modal .modal-text{ text-align:right; margin:0; }
+
+  /* ---------- register ---------- */
+  .register-form{ display:flex; flex-direction:column; gap:12px; width:100%; max-width:320px; margin-top:6px; }
+  .reg-row{ display:flex; gap:12px; }
+  .reg-row input{ flex:1; min-width:0; }
+  .register-form input[type="text"], .register-form input[type="email"], .register-form input[type="tel"], .register-form input[type="password"]{
+    width:100%; padding:14px 16px; border-radius:12px; border:1px solid rgba(255,248,234,0.35);
+    background: rgba(255,248,234,0.1); color: var(--cream); font-family:'Heebo'; font-size:15px; outline:none;
+    direction:rtl; text-align:right;
+  }
+  .register-form input::placeholder{ color: rgba(255,248,234,0.65); }
+  .reg-check{ display:flex; align-items:flex-start; gap:10px; text-align:right; font-size:13px; color:var(--cream); opacity:0.9; margin-top:4px; cursor:pointer; }
+  .reg-check input{ margin-top:3px; width:16px; height:16px; flex-shrink:0; }
+  .privacy-note{ font-size:11.5px; opacity:0.65; max-width:300px; margin-top:22px; line-height:1.7; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar hidden" id="topbar">
+    <button class="signout-btn" onclick="signOut()">התנתקות</button>
+    <button class="signout-btn" onclick="showView('gate')">יש לך קוד גישה?</button>
+  </div>
+
+  <!-- COMPLETION MODAL -->
+  <div id="completion-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="brandmark"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="#FFF8EA"/></svg><span>סַהֲרָה</span></div>
+      <h2 class="modal-title">סיימת את המסע!</h2>
+      <p class="modal-text">ענית על כל השאלות. מוזמנת להיכנס ולקרוא את הסיפור האישי שלך.</p>
+      <button class="btn btn-primary" onclick="goToStoryFromModal()">לסיפור האישי שלי</button>
+      <button class="btn btn-ghost" onclick="closeCompletionModal()">אחר כך</button>
+    </div>
+  </div>
+
+  <!-- JOURNAL PROMO MODAL -->
+  <div id="promo-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="brandmark"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="#FFF8EA"/></svg><span>סַהֲרָה</span></div>
+      <h2 class="modal-title">רוצה להמשיך לחקור את עצמך?</h2>
+      <p class="modal-text">בואי להפוך לגרסה הכי טובה שלך</p>
+      <p class="modal-text">יומן סַהֲרָה - העוגן שלך לפני השינה</p>
+      <p class="modal-text">זמין למכירה</p>
+      <p class="modal-text">קוד הנחה מיוחד בשבילך: <strong>YOURTIME</strong></p>
+      <a class="btn btn-primary" href="https://morning-shops.com/SAHARA" target="_blank" rel="noopener">לרכישת היומן</a>
+      <button class="btn btn-ghost" onclick="closePromoModal()">אחר כך</button>
+    </div>
+  </div>
+
+  <!-- ABOUT MODAL -->
+  <div id="about-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="brandmark"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="#FFF8EA"/></svg><span>סַהֲרָה</span></div>
+      <h2 class="modal-title">מה מחכה לי כאן?</h2>
+      <p class="modal-text">סַהֲרָה הוא לא יומן רגיל - זה מסע כתיבה אישי, בקצב שלך ובזמן שלך.</p>
+      <p class="modal-text">לאורך המסע תעברי 7 פרקים, כל אחד עוסק בפינה אחרת בך: מי את היום, איך את מרגישה בגוף שלך, זוגיות ואהבה, אמונה ומשמעות, העבר שעיצב אותך, החלומות שלך לעתיד, ואהבה עצמית.</p>
+      <p class="modal-text">בכל פרק - שאלות פתוחות שמזמינות אותך לכתוב חופשי, בלי חוקים ובלי "תשובה נכונה". את יכולה לעצור באמצע ולחזור מתי שנוח לך - הכל נשמר אוטומטית.</p>
+      <p class="modal-text"><strong>התוכן שלך פרטי לגמרי</strong> - אף אחד, כולל אנחנו, לא יכול לקרוא את מה שכתבת.</p>
+      <p class="modal-text">בסוף המסע, כשתסיימי לענות על כל השאלות - מחכה לך הפתעה: <strong>סיפור אישי</strong>, שנכתב במיוחד בשבילך על סמך מה ששיתפת, ומשקף מי את.</p>
+      <p class="modal-text">זה לא טיפול ולא תחליף לטיפול - זה פשוט מרחב בטוח להכיר את עצמך קצת יותר לעומק.</p>
+      <a class="btn btn-primary" href="https://pay.grow.link/50620ab007644d472b300ee20a312a46-MTk3MzU5NA" target="_blank" rel="noopener">29 ש"ח בלבד</a>
+      <button class="btn btn-ghost" onclick="closeAboutModal()">סגירה</button>
+    </div>
+  </div>
+
+  <!-- AUTH -->
+  <div id="view-auth">
+    <div class="age-badge">המלצה: 18+</div>
+    <div class="brandmark" style="margin-top:10px;"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="#FFF8EA"/></svg><span>סַהֲרָה</span></div>
+    <h1 class="title" id="auth-title" style="font-size:32px; margin-top:6px;">בואי נכיר</h1>
+    <p class="tagline" id="auth-tagline" style="margin-bottom:20px;">תהליך של היכרות עצמית, בקצב שלך.</p>
+
+    <!-- pay -->
+    <div id="pay-block">
+      <p style="font-size:13px; opacity:0.75; margin-bottom:10px;">לחצי כאן לתשלום:</p>
+      <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+        <a class="btn btn-primary" href="https://pay.grow.link/50620ab007644d472b300ee20a312a46-MTk3MzU5NA" target="_blank" rel="noopener">29 ש"ח בלבד</a>
+        <button class="btn btn-ghost" onclick="showAboutModal()">איך זה עובד?</button>
+      </div>
+      <p class="privacy-note" id="privacy-note">התשלום מאובטח ומתבצע דרך Grow.<br>אחרי התשלום יישלח לך מייל עם קישור כניסה ישיר.</p>
+    </div>
+    <button class="auth-switch-link" id="to-login-link" onclick="switchAuthMode('login')">כבר שילמת? התחברי</button>
+    <button class="auth-switch-link" id="to-code-link" onclick="switchAuthMode('code')">יש לך קוד גישה?</button>
+
+    <!-- login -->
+    <div class="auth-card hidden" id="login-block">
+      <input id="auth-email" type="email" placeholder="אימייל" autocomplete="email">
+      <input id="auth-password" type="password" placeholder="סיסמה" autocomplete="current-password">
+      <div class="auth-error" id="auth-error"></div>
+      <button class="btn btn-primary" id="auth-submit" onclick="handleLoginSubmit()">התחברי</button>
+    </div>
+    <button class="auth-switch-link hidden" id="to-register-link" onclick="switchAuthMode('pay')">עדיין לא שילמת? למעבר לתשלום</button>
+
+    <!-- code signup -->
+    <div class="auth-card hidden" id="code-block">
+      <input id="code-email" type="email" placeholder="אימייל" autocomplete="email">
+      <input id="code-password" type="password" placeholder="בחרי סיסמה" autocomplete="new-password">
+      <input id="code-code" type="text" placeholder="קוד גישה" autocomplete="off" style="letter-spacing:0.05em;">
+      <div class="auth-error" id="code-error"></div>
+      <button class="btn btn-primary" id="code-submit" onclick="handleCodeSignup()">כניסה עם קוד</button>
+    </div>
+    <button class="auth-switch-link hidden" id="to-pay-from-code-link" onclick="switchAuthMode('pay')">אין לך קוד? למעבר לתשלום</button>
+  </div>
+
+  <!-- SET PASSWORD (first login after payment) -->
+  <div id="view-setpass" class="hidden">
+    <div class="brandmark" style="margin-top:10px;"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="#FFF8EA"/></svg><span>סַהֲרָה</span></div>
+    <h1 class="title" style="font-size:30px; margin-top:6px;">כמעט שם</h1>
+    <p class="tagline" style="margin-bottom:20px;">בחרי סיסמה כדי להשלים את הכניסה שלך.</p>
+    <div class="auth-card">
+      <input id="setpass-password" type="password" placeholder="סיסמה חדשה" autocomplete="new-password">
+      <div class="auth-error" id="setpass-error"></div>
+      <button class="btn btn-primary" id="setpass-submit" onclick="handleSetPassword()">שמירה והתחלה</button>
+    </div>
+  </div>
+
+  <!-- GATE -->
+  <div id="view-gate" class="hidden">
+    <div class="brandmark" style="margin-top:10px;"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="#FFF8EA"/></svg><span>סַהֲרָה</span></div>
+    <h1 class="title" style="font-size:30px; margin-top:6px;">עוד צעד אחד</h1>
+    <p class="tagline" style="margin-bottom:20px;">הזיני את קוד הגישה שקיבלת ברכישת החוברת.</p>
+    <div class="auth-card">
+      <input id="gate-code" type="text" placeholder="קוד גישה" autocomplete="off" style="text-align:center; letter-spacing:0.05em;">
+      <div class="auth-error" id="gate-error"></div>
+      <button class="btn btn-primary" id="gate-submit" onclick="handleRedeemCode()">אישור קוד</button>
+    </div>
+    <p class="privacy-note">עדיין לא רכשת? אפשר לרכוש ב-<br><a href="https://morning-shops.com/SAHARA" target="_blank" rel="noopener" style="color:var(--cream);"><bdi>morning-shops.com/SAHARA</bdi></a></p>
+  </div>
+
+  <!-- WELCOME -->
+  <div id="view-welcome" class="hidden">
+    <svg class="moon-hero" viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="#FFF8EA"/><circle cx="66" cy="50" r="42" fill="#A4643E"/></svg>
+    <div>
+      <h1 class="title">סַהֲרָה<br>להכיר את עצמך</h1>
+      <p class="tagline">לכתוב את הסיפור שלך, להכיר את מי שהיית, את מי שאת עכשיו ואת מי שאת רוצה להיות. ברוכה הבאה.</p>
+    </div>
+    <div class="welcome-actions">
+      <button class="btn btn-primary" onclick="goToMenu()">התחילי</button>
+    </div>
+    <div class="progress-hint" id="welcome-progress"></div>
+  </div>
+
+  <!-- MENU -->
+  <div id="view-menu" class="hidden">
+    <div class="menu-head">
+      <div class="brandmark"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="#FFF8EA"/></svg><span>סַהֲרָה</span></div>
+      <h2>הפרקים שלך</h2>
+      <div class="overall-bar"><div class="overall-fill" id="overall-fill"></div></div>
+      <div class="overall-label" id="overall-label"></div>
+    </div>
+    <div class="chapters" id="chapters-list"></div>
+    <button class="btn btn-primary story-btn" id="story-btn" onclick="handleStoryButton()">לסיפור האישי שלי</button>
+    <div class="story-hint" id="story-hint">לשימוש פעם אחת</div>
+    <a class="journal-link" href="https://morning-shops.com/SAHARA" target="_blank" rel="noopener"><bdi>@sahara.nightjournal</bdi> | <bdi>morning-shops.com/SAHARA</bdi></a>
+  </div>
+
+  <!-- STORY -->
+  <div id="view-story" class="hidden">
+    <div class="q-top">
+      <button class="q-back" onclick="leaveStory()"><span>הפרקים</span><span class="nav-arrow">→</span></button>
+    </div>
+    <h1 class="title" style="font-size:26px; text-align:center;">הסיפור שלך</h1>
+    <div class="story-content" id="story-content"></div>
+  </div>
+
+  <!-- QUESTION -->
+  <div id="view-question" class="hidden">
+    <div class="q-top">
+      <button class="q-back" onclick="goToMenu()"><span>הפרקים</span><span class="nav-arrow">→</span></button>
+      <div class="q-progress" id="q-progress"></div>
+    </div>
+    <div class="q-dots" id="q-dots"></div>
+    <div class="q-chapter-label" id="q-chapter-label"></div>
+    <div class="q-moon-center" id="q-moon"></div>
+    <div class="q-text" id="q-text"></div>
+    <div class="q-helper-hint">כתבי כמה שבא לך, בלי חוקים ובלי לחץ. כל מה שתשתפי כאן יהפוך בסוף לסיפור האישי שלך.</div>
+    <textarea id="q-answer" placeholder="כתבי כאן... אין הגבלת אורך."></textarea>
+    <div class="save-hint" id="save-hint"></div>
+    <div class="q-nav">
+      <button class="btn btn-ghost" id="btn-prev" onclick="prevQuestion()"><span>הקודמת</span><span class="nav-arrow">→</span></button>
+      <button class="btn btn-primary" id="btn-next" onclick="nextQuestion()"><span class="nav-arrow" id="btn-next-arrow">←</span><span id="btn-next-label">הבאה</span></button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const SUPABASE_URL = 'https://zbzhsqcuubbeemhlblvq.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_-CJmYjnunQheOi9y2hqpmA_YlJ6aWrA';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const CHAPTERS = [
+  {
+    id: 'zehut', name: 'מי אני', icon:'🌙',
+    questions: [
+      'מהם שלושה הערכים שהכי חשובים לי, ולמה דווקא הם?',
+      'מה הכח הכי גדול שלי בשעת משבר?',
+      'מי או מה הכי תומך בי ביום-יום שלי?',
+      'מה אני עושה שגורם לי להיות גאה בעצמי?',
+      'איך הייתי מגדירה את האישה שאני היום?'
+    ]
+  },
+  {
+    id: 'guf', name: 'גוף ותחושה עצמית',
+    questions: [
+      'אני מרגישה בתוך הגוף שלי...',
+      'איך אני אוהבת לפנק את עצמי?',
+      'מה המילים שאני רוצה להגיד לעצמי כשאני עומדת מול המראה?',
+      'מה קשה לי לקבל בגוף שלי, ולמה?',
+      'מה אני הכי אוהבת בעצמי, ולמה?'
+    ]
+  },
+  {
+    id: 'zugiyut', name: 'זוגיות ואהבה',
+    questions: [
+      'אהבה בשבילי היא...',
+      'מה הייתי רוצה לקבל במערכת יחסים, שקשה לי לבקש?',
+      'מה אני אוהבת לתת מעצמי בתוך זוגיות?',
+      'מה אני יכולה לעשות שיהפוך את המערכת יחסים שלי לטובה יותר?',
+      'מה למדתי על עצמי מתוך זוגיות שהייתה לי?'
+    ]
+  },
+  {
+    id: 'emuna', name: 'אמונה ומשמעות',
+    questions: [
+      'מה מעניק לי משמעות?',
+      'מה עוזר לי להאמין בעצמי, גם כשקשה?',
+      'מה אני מודה עליו הכי הרבה בחיים שלי?',
+      'מתי אני מרגישה אופטימית בחיי?',
+      'איזו תחושה אני רוצה שתלווה אותי בכל החלטה שאני מקבלת?'
+    ]
+  },
+  {
+    id: 'avar', name: 'עבר ומסע',
+    questions: [
+      'חוויה טובה שחקוקה בי...',
+      'מי האדם שהכי השפיע עליי, ולמה?',
+      'מה הדבר הכי אמיץ שעשיתי אי פעם?',
+      { text: 'במה אני נזכרת שעדיין מכווץ לי את הלב לפעמים?', note: 'קחי נשימה עמוקה אחרי זה' },
+      'מה הייתי אומרת לעצמי הצעירה יותר?'
+    ]
+  },
+  {
+    id: 'atid', name: 'עתיד וחלומות',
+    questions: [
+      'איזו חוויה אני עוד רוצה להגשים?',
+      'מה אני הכי רוצה שישתנה אצלי בשנה הקרובה?',
+      'מה הייתי עושה אם הפחד לא היה שיקול?',
+      'איך נראים החיים שלי בעוד חמש שנים, בגרסה הכי טובה שלהם?',
+      'מה אני רוצה שיזכרו ממני?'
+    ]
+  },
+  {
+    id: 'kalil', name: 'אהבה עצמית', light:true,
+    questions: [
+      'כמה מילים על הסקסיות שיש בי.',
+      'מתי אני מרגישה הכי בטוחה בעצמי?',
+      'באיזה אופן אני מרגישה שאני תורמת משהו מעצמי לעולם?'
+    ]
+  }
+];
+
+let answers = {};
+let currentChapterIdx = null;
+let currentQIdx = 0;
+let saveTimer = null;
+let currentUser = null;
+let authMode = 'pay';
+
+function qKey(ci, qi){ return CHAPTERS[ci].id + ':' + qi; }
+
+function totalQuestions(){
+  return CHAPTERS.reduce((sum,c)=>sum + c.questions.length, 0);
+}
+function answeredCount(){
+  return Object.values(answers).filter(v => v && v.trim().length > 0).length;
+}
+function chapterAnsweredCount(ci){
+  const c = CHAPTERS[ci];
+  let n = 0;
+  for(let i=0;i<c.questions.length;i++){
+    const v = answers[qKey(ci,i)];
+    if(v && v.trim().length>0) n++;
+  }
+  return n;
+}
+
+async function loadAnswersFromDB(){
+  answers = {};
+  const { data, error } = await sb.from('answers').select('chapter_id,question_index,answer_text');
+  if(error){ console.error('load failed', error); return; }
+  data.forEach(row=>{
+    answers[row.chapter_id + ':' + row.question_index] = row.answer_text;
+  });
+  renderWelcomeProgress();
+}
+
+async function saveAnswerToDB(chapterId, qIndex, text){
+  const { error } = await sb.from('answers').upsert({
+    user_id: currentUser.id,
+    chapter_id: chapterId,
+    question_index: qIndex,
+    answer_text: text,
+    updated_at: new Date().toISOString()
+  }, { onConflict: 'user_id,chapter_id,question_index' });
+  return error;
+}
+
+async function saveState(){
+  const c = CHAPTERS[currentChapterIdx];
+  const text = answers[qKey(currentChapterIdx,currentQIdx)] || '';
+  const hint = document.getElementById('save-hint');
+  const error = await saveAnswerToDB(c.id, currentQIdx, text);
+  if(error){ console.error('save failed', error); if(hint) hint.textContent = 'שגיאה בשמירה'; return; }
+  if(hint){ hint.textContent = 'נשמר ✓'; setTimeout(()=>{ if(hint.textContent==='נשמר ✓') hint.textContent=''; }, 1500); }
+}
+
+function switchAuthMode(mode){
+  authMode = mode;
+  const isPay = mode === 'pay';
+  const isLogin = mode === 'login';
+  const isCode = mode === 'code';
+
+  document.getElementById('pay-block').classList.toggle('hidden', !isPay);
+  document.getElementById('privacy-note').classList.toggle('hidden', !isPay);
+  document.getElementById('to-login-link').classList.toggle('hidden', !isPay);
+  document.getElementById('to-code-link').classList.toggle('hidden', !isPay);
+
+  document.getElementById('login-block').classList.toggle('hidden', !isLogin);
+  document.getElementById('to-register-link').classList.toggle('hidden', !isLogin);
+
+  document.getElementById('code-block').classList.toggle('hidden', !isCode);
+  document.getElementById('to-pay-from-code-link').classList.toggle('hidden', !isCode);
+
+  document.getElementById('auth-title').textContent = isPay ? 'בואי נכיר' : (isLogin ? 'ברוכה השבה' : 'כניסה עם קוד');
+  document.getElementById('auth-tagline').textContent = isPay ? 'תהליך של היכרות עצמית, בקצב שלך.' : (isLogin ? 'התחברי כדי להמשיך מאיפה שעצרת.' : 'יש לך קוד גישה? בחרי מייל וסיסמה כדי להתחיל.');
+  document.getElementById('auth-error').textContent = '';
+  const codeErr = document.getElementById('code-error');
+  if(codeErr) codeErr.textContent = '';
+}
+
+function translateAuthError(error){
+  const msg = (error && error.message) || '';
+  if(msg.includes('Invalid login credentials')) return 'אימייל או סיסמה שגויים';
+  if(msg.includes('User already registered')) return 'כבר יש חשבון עם האימייל הזה - נסי להתחבר';
+  if(msg.includes('Password should be at least')) return 'הסיסמה צריכה להיות באורך 6 תווים לפחות';
+  return 'משהו השתבש, נסי שוב';
+}
+
+async function handleSetPassword(){
+  const password = document.getElementById('setpass-password').value;
+  const errEl = document.getElementById('setpass-error');
+  errEl.textContent = '';
+  if(!password || password.length < 6){ errEl.textContent = 'הסיסמה צריכה להיות באורך 6 תווים לפחות'; return; }
+
+  const btn = document.getElementById('setpass-submit');
+  btn.disabled = true;
+  try{
+    const { data, error } = await sb.auth.updateUser({ password });
+    if(error){ errEl.textContent = translateAuthError(error); return; }
+    await onLoggedIn(data.user);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+sb.auth.onAuthStateChange((event, session) => {
+  if(event === 'PASSWORD_RECOVERY' && session){
+    currentUser = session.user;
+    document.getElementById('setpass-password').value = '';
+    document.getElementById('setpass-error').textContent = '';
+    showView('setpass');
+  }
+});
+
+async function handleCodeSignup(){
+  const email = document.getElementById('code-email').value.trim();
+  const password = document.getElementById('code-password').value;
+  const code = document.getElementById('code-code').value.trim().toUpperCase();
+  const errEl = document.getElementById('code-error');
+  errEl.textContent = '';
+  if(!email || !password || !code){ errEl.textContent = 'נא למלא את כל השדות'; return; }
+
+  const btn = document.getElementById('code-submit');
+  btn.disabled = true;
+  try{
+    const { data, error } = await sb.auth.signUp({ email, password });
+    if(error){ errEl.textContent = translateAuthError(error); return; }
+    if(!data.session){
+      errEl.textContent = 'ההרשמה בוצעה אך יש לאשר מייל לפני התחברות.';
+      return;
+    }
+    const { data: redeemed, error: redeemErr } = await sb.rpc('redeem_access_code', { p_code: code });
+    if(redeemErr || !redeemed){
+      errEl.textContent = 'הקוד לא תקין או שכבר נוצל. בדקי את הקוד או פני אלינו.';
+      return;
+    }
+    await onLoggedIn(data.user);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function handleLoginSubmit(){
+  const email = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  const errEl = document.getElementById('auth-error');
+  errEl.textContent = '';
+  if(!email || !password){ errEl.textContent = 'נא למלא אימייל וסיסמה'; return; }
+
+  const submitBtn = document.getElementById('auth-submit');
+  submitBtn.disabled = true;
+  try{
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    if(error){ errEl.textContent = translateAuthError(error); return; }
+    await onLoggedIn(data.user);
+  } finally {
+    submitBtn.disabled = false;
+  }
+}
+
+async function onLoggedIn(user){
+  currentUser = user;
+  document.getElementById('topbar').classList.remove('hidden');
+  const unlocked = await checkUnlocked();
+  if(!unlocked){
+    document.getElementById('gate-code').value = '';
+    document.getElementById('gate-error').textContent = '';
+    showView('gate');
+    return;
+  }
+  await loadAnswersFromDB();
+  showView('welcome');
+}
+
+async function checkUnlocked(){
+  const { data, error } = await sb.from('access_codes').select('code').eq('used_by', currentUser.id).limit(1);
+  if(error){ console.error('unlock check failed', error); return false; }
+  return data && data.length > 0;
+}
+
+async function handleRedeemCode(){
+  const code = document.getElementById('gate-code').value.trim().toUpperCase();
+  const errEl = document.getElementById('gate-error');
+  errEl.textContent = '';
+  if(!code){ errEl.textContent = 'נא להזין קוד'; return; }
+
+  const btn = document.getElementById('gate-submit');
+  btn.disabled = true;
+  try{
+    const { data, error } = await sb.rpc('redeem_access_code', { p_code: code });
+    if(error || !data){
+      errEl.textContent = 'הקוד לא תקין או שכבר נוצל. בדקי את הקוד או פני אלינו.';
+      return;
+    }
+    await loadAnswersFromDB();
+    showView('welcome');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function signOut(){
+  await sb.auth.signOut();
+  currentUser = null;
+  answers = {};
+  currentChapterIdx = null;
+  document.getElementById('auth-email').value = '';
+  document.getElementById('auth-password').value = '';
+  document.getElementById('topbar').classList.add('hidden');
+  switchAuthMode('pay');
+  showView('auth');
+}
+
+function renderWelcomeProgress(){
+  const total = totalQuestions();
+  const done = answeredCount();
+  const el = document.getElementById('welcome-progress');
+  el.textContent = done > 0 ? `כבר ענית על ${done} מתוך ${total} שאלות` : `${total} שאלות מחכות לך, בקצב שלך`;
+}
+
+function suggestedChapterIdx(){
+  for(let i=0;i<CHAPTERS.length;i++){
+    if(chapterAnsweredCount(i) < CHAPTERS[i].questions.length) return i;
+  }
+  return -1;
+}
+
+function showView(name){
+  ['auth','setpass','gate','welcome','menu','question','story'].forEach(v=>{
+    document.getElementById('view-'+v).classList.toggle('hidden', v!==name);
+  });
+}
+
+function goToMenu(){
+  renderMenu();
+  updateStoryButton();
+  showView('menu');
+}
+
+let cachedStory = null;
+
+async function checkStoryExists(){
+  const { data } = await sb.from('stories').select('content').eq('user_id', currentUser.id).maybeSingle();
+  return data ? data.content : null;
+}
+
+async function updateStoryButton(){
+  cachedStory = await checkStoryExists();
+  const btn = document.getElementById('story-btn');
+  const hint = document.getElementById('story-hint');
+  const total = totalQuestions();
+  const done = answeredCount();
+  if(cachedStory){
+    btn.disabled = false;
+    btn.textContent = 'קראי את הסיפור שלך';
+    hint.textContent = '';
+  } else if(done < total){
+    btn.disabled = true;
+    btn.textContent = 'לסיפור האישי שלי';
+    hint.textContent = `ענית על ${done} מתוך ${total} שאלות - סיימי את כולן כדי לפתוח את הסיפור שלך`;
+  } else {
+    btn.disabled = false;
+    btn.textContent = 'לסיפור האישי שלי';
+    hint.textContent = 'לשימוש פעם אחת';
+  }
+}
+
+async function handleStoryButton(){
+  if(cachedStory){
+    showStory(cachedStory);
+    return;
+  }
+  const btn = document.getElementById('story-btn');
+  btn.disabled = true;
+  btn.textContent = 'יוצרת את הסיפור שלך... (עד דקה)';
+  try{
+    const { data, error } = await sb.functions.invoke('quick-processor', { body: {} });
+    if(error || !data || !data.content){
+      alert('משהו השתבש ביצירת הסיפור. נסי שוב בעוד רגע.');
+      return;
+    }
+    cachedStory = data.content;
+    showStory(cachedStory);
+  } finally {
+    btn.disabled = false;
+    updateStoryButton();
+  }
+}
+
+function showStory(content){
+  document.getElementById('story-content').textContent = content;
+  showView('story');
+}
+
+function leaveStory(){
+  goToMenu();
+  showPromoModal();
+}
+
+function showPromoModal(){
+  document.getElementById('promo-modal').classList.remove('hidden');
+}
+
+function closePromoModal(){
+  document.getElementById('promo-modal').classList.add('hidden');
+}
+
+function showAboutModal(){
+  document.getElementById('about-modal').classList.remove('hidden');
+}
+
+function closeAboutModal(){
+  document.getElementById('about-modal').classList.add('hidden');
+}
+
+function moonPhaseSVG(pct, idx){
+  const r = 14, cx = 15, cy = 15;
+  const shift = Math.max(0, Math.min(1, pct)) * (r * 2);
+  const maskId = 'moonmask-' + idx;
+  return `<svg class="chapter-moon" viewBox="0 0 30 30">
+    <defs>
+      <mask id="${maskId}">
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="#fff"/>
+        <circle cx="${cx + shift}" cy="${cy}" r="${r}" fill="#000"/>
+      </mask>
+    </defs>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--cream)" stroke-width="1" opacity="0.5"/>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="var(--cream)" mask="url(#${maskId})"/>
+  </svg>`;
+}
+
+function renderMenu(){
+  const total = totalQuestions();
+  const done = answeredCount();
+  document.getElementById('overall-fill').style.width = (total? (done/total*100):0) + '%';
+  document.getElementById('overall-label').textContent = `${done} מתוך ${total} שאלות נענו`;
+
+  const suggested = suggestedChapterIdx();
+  const list = document.getElementById('chapters-list');
+  list.innerHTML = '';
+  CHAPTERS.forEach((c, idx)=>{
+    const done_c = chapterAnsweredCount(idx);
+    const card = document.createElement('div');
+    card.className = 'chapter-card' + (idx===suggested ? ' suggested' : '');
+    card.onclick = () => openChapter(idx);
+    card.innerHTML = `
+      <div class="chapter-left">
+        ${moonPhaseSVG(done_c / c.questions.length, idx)}
+        <div class="chapter-left-text">
+          <div class="chapter-name">${c.name}</div>
+          <div class="chapter-meta">${idx===suggested ? 'מוצע להיום' : ''}</div>
+        </div>
+      </div>
+      <div class="chapter-count">${done_c}/${c.questions.length}<small>נענו</small></div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+function openChapter(ci){
+  currentChapterIdx = ci;
+  const c = CHAPTERS[ci];
+  let startAt = 0;
+  for(let i=0;i<c.questions.length;i++){
+    const v = answers[qKey(ci,i)];
+    if(!v || !v.trim()){ startAt = i; break; }
+    startAt = i;
+  }
+  currentQIdx = startAt;
+  renderQuestion();
+  showView('question');
+}
+
+function qText(q){ return (typeof q === 'object') ? q.text : q; }
+function qNote(q){ return (typeof q === 'object') ? q.note : null; }
+
+function renderQuestion(){
+  const c = CHAPTERS[currentChapterIdx];
+  const total = c.questions.length;
+  const q = c.questions[currentQIdx];
+  document.getElementById('q-chapter-label').textContent = c.name;
+  document.getElementById('q-text').textContent = qText(q);
+  const note = qNote(q);
+  let noteEl = document.getElementById('q-note');
+  if(!noteEl){
+    noteEl = document.createElement('div');
+    noteEl.id = 'q-note';
+    noteEl.style.cssText = 'text-align:center; font-size:13px; opacity:0.75; margin:-10px 0 16px; font-style:italic;';
+    document.getElementById('q-text').insertAdjacentElement('afterend', noteEl);
+  }
+  noteEl.textContent = note || '';
+  noteEl.style.display = note ? 'block' : 'none';
+  document.getElementById('q-progress').textContent = `${currentQIdx+1} / ${total}`;
+  const doneInChapter = chapterAnsweredCount(currentChapterIdx);
+  document.getElementById('q-moon').innerHTML = moonPhaseSVG(doneInChapter / total, 'q'+currentChapterIdx);
+
+  const dotsEl = document.getElementById('q-dots');
+  dotsEl.innerHTML = '';
+  for(let i=0;i<total;i++){
+    const d = document.createElement('div');
+    const answered = answers[qKey(currentChapterIdx,i)] && answers[qKey(currentChapterIdx,i)].trim();
+    d.className = 'dot' + (i===currentQIdx ? ' current' : (answered ? ' done' : ''));
+    dotsEl.appendChild(d);
+  }
+
+  const ta = document.getElementById('q-answer');
+  ta.value = answers[qKey(currentChapterIdx,currentQIdx)] || '';
+  document.getElementById('save-hint').textContent = '';
+
+  document.getElementById('btn-prev').disabled = (currentQIdx === 0);
+  const isLastInChapter = (currentQIdx === total-1);
+  document.getElementById('btn-next-label').textContent = isLastInChapter ? 'סיימתי את הפרק ✓' : 'הבאה';
+  document.getElementById('btn-next-arrow').style.display = isLastInChapter ? 'none' : '';
+}
+
+function persistCurrentAnswer(){
+  const ta = document.getElementById('q-answer');
+  answers[qKey(currentChapterIdx,currentQIdx)] = ta.value;
+}
+
+document.addEventListener('input', (e)=>{
+  if(e.target && e.target.id === 'q-answer'){
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(()=>{
+      persistCurrentAnswer();
+      saveState();
+    }, 600);
+  }
+});
+
+function nextQuestion(){
+  const wasComplete = answeredCount() === totalQuestions();
+  persistCurrentAnswer();
+  saveState();
+  const nowComplete = answeredCount() === totalQuestions();
+  const c = CHAPTERS[currentChapterIdx];
+  if(currentQIdx < c.questions.length - 1){
+    currentQIdx++;
+    renderQuestion();
+  } else {
+    goToMenu();
+  }
+  if(!wasComplete && nowComplete){
+    showCompletionPopup();
+  }
+}
+
+function showCompletionPopup(){
+  document.getElementById('completion-modal').classList.remove('hidden');
+}
+
+function closeCompletionModal(){
+  document.getElementById('completion-modal').classList.add('hidden');
+}
+
+async function goToStoryFromModal(){
+  closeCompletionModal();
+  showView('menu');
+  renderMenu();
+  await updateStoryButton();
+  await handleStoryButton();
+}
+
+function prevQuestion(){
+  persistCurrentAnswer();
+  saveState();
+  if(currentQIdx > 0){
+    currentQIdx--;
+    renderQuestion();
+  }
+}
+
+async function init(){
+  if(window.location.hash.includes('type=recovery')){
+    return; // handled by the PASSWORD_RECOVERY listener above
+  }
+  const { data: { session } } = await sb.auth.getSession();
+  if(session){
+    await onLoggedIn(session.user);
+  } else {
+    showView('auth');
+  }
+}
+init();
+</script>
+</body>
+</html>
