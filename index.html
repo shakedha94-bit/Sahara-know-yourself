@@ -129,6 +129,11 @@
   }
   .feedback-label{ font-size:14px; color:var(--cream); margin-bottom:10px; text-align:center; }
   .feedback-box textarea{ min-height:90px; font-size:14px; padding:14px; }
+  .feedback-box input{
+    width:100%; margin-top:10px; background: var(--cream); color: var(--ink); border:none; border-radius:12px;
+    padding: 12px 14px; font-family:'Heebo'; font-size:14px; outline:none; text-align:center; box-sizing:border-box;
+  }
+  .feedback-box input::placeholder{ color: var(--ink-soft); opacity:0.6; }
   .feedback-box .btn{ width:100%; margin-top:10px; }
   .feedback-thanks{ text-align:center; color:var(--cream); font-size:14px; opacity:0.9; }
 
@@ -378,6 +383,7 @@
       <div id="feedback-form">
         <p class="feedback-label">איך היה לך? אשמח לשמוע 💛</p>
         <textarea id="feedback-text" placeholder="שתפי אותי בכמה מילים..."></textarea>
+        <input id="feedback-name" type="text" placeholder="שם פרטי בלבד (לא חובה)" autocomplete="given-name">
         <div class="auth-error" id="feedback-error"></div>
         <button class="btn btn-ghost" id="feedback-submit" onclick="handleSubmitFeedback()">שליחה</button>
       </div>
@@ -784,6 +790,7 @@ async function handleStoryButton(){
 function showStory(content){
   document.getElementById('story-content').textContent = content;
   document.getElementById('feedback-text').value = '';
+  document.getElementById('feedback-name').value = '';
   document.getElementById('feedback-error').textContent = '';
   document.getElementById('feedback-form').classList.remove('hidden');
   document.getElementById('feedback-thanks').classList.add('hidden');
@@ -792,6 +799,7 @@ function showStory(content){
 
 async function handleSubmitFeedback(){
   const text = document.getElementById('feedback-text').value.trim();
+  const name = document.getElementById('feedback-name').value.trim();
   const errEl = document.getElementById('feedback-error');
   errEl.textContent = '';
   if(!text){ errEl.textContent = 'נא לכתוב משהו לפני השליחה'; return; }
@@ -799,7 +807,7 @@ async function handleSubmitFeedback(){
   const btn = document.getElementById('feedback-submit');
   btn.disabled = true;
   try{
-    const { error } = await sb.from('feedback').insert({ user_id: currentUser.id, content: text });
+    const { error } = await sb.from('feedback').insert({ user_id: currentUser.id, content: text, name: name || null });
     if(error){ errEl.textContent = 'משהו השתבש, נסי שוב'; return; }
     document.getElementById('feedback-form').classList.add('hidden');
     document.getElementById('feedback-thanks').classList.remove('hidden');
