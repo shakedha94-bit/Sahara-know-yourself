@@ -232,6 +232,23 @@
   .reg-check input{ margin-top:3px; width:16px; height:16px; flex-shrink:0; }
   .privacy-note{ font-size:11.5px; opacity:0.65; max-width:300px; margin-top:22px; line-height:1.7; }
 </style>
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '2132119363993562');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=2132119363993562&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Meta Pixel Code -->
 </head>
 <body>
 <div class="app">
@@ -277,7 +294,7 @@
       <p class="modal-text"><strong>התוכן שלך פרטי לגמרי</strong> - אף אחד, כולל אנחנו, לא יכול לקרוא את מה שכתבת.</p>
       <p class="modal-text">בסוף המסע מחכה לך הפתעה: <strong>סיפור אישי</strong> שנכתב במיוחד בשבילך, ויאפשר לך להתבונן על עצמך באור אחר - מעבר לסיפור שאת מספרת על עצמך היום.</p>
       <p class="modal-text">זה לא טיפול ולא תחליף לטיפול - זה פשוט מרחב בטוח להכיר את עצמך קצת יותר לעומק.</p>
-      <a class="btn btn-primary" href="https://pay.grow.link/50620ab007644d472b300ee20a312a46-MTk3MzU5NA" target="_blank" rel="noopener">29 ש"ח בלבד</a>
+      <a class="btn btn-primary" href="https://pay.grow.link/50620ab007644d472b300ee20a312a46-MTk3MzU5NA" target="_blank" rel="noopener" onclick="if(typeof fbq==='function'){fbq('track','Lead');}">29 ש"ח בלבד</a>
       <button class="btn btn-ghost" onclick="closeAboutModal()">סגירה</button>
     </div>
   </div>
@@ -293,7 +310,7 @@
     <div id="pay-block">
       <p style="font-size:13px; opacity:0.75; margin-bottom:10px;">לחצי כאן לתשלום:</p>
       <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
-        <a class="btn btn-primary" href="https://pay.grow.link/50620ab007644d472b300ee20a312a46-MTk3MzU5NA" target="_blank" rel="noopener">29 ש"ח בלבד</a>
+        <a class="btn btn-primary" href="https://pay.grow.link/50620ab007644d472b300ee20a312a46-MTk3MzU5NA" target="_blank" rel="noopener" onclick="if(typeof fbq==='function'){fbq('track','Lead');}">29 ש"ח בלבד</a>
         <button class="btn btn-ghost" onclick="showAboutModal()">איך זה עובד?</button>
       </div>
       <p class="privacy-note" id="privacy-note">התשלום מאובטח ומתבצע דרך Grow.<br>אחרי התשלום יישלח לך מייל עם קישור כניסה ישיר.</p>
@@ -608,6 +625,7 @@ async function handleSetPassword(){
   try{
     const { data, error } = await sb.auth.updateUser({ password });
     if(error){ errEl.textContent = translateAuthError(error); return; }
+    if(typeof fbq === 'function'){ fbq('track', 'Purchase', {value: 29.00, currency: 'ILS'}); }
     await onLoggedIn(data.user);
   } finally {
     btn.disabled = false;
