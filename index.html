@@ -286,7 +286,7 @@
   <div id="view-auth">
     <div class="age-badge">המלצה: 18+</div>
     <div class="brandmark" style="margin-top:10px;"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="#FFF8EA"/></svg><span>סַהֲרָה</span></div>
-    <h1 class="title" id="auth-title" style="font-size:32px; margin-top:6px;">בואי נכיר</h1>
+    <h1 class="title" id="auth-title" style="font-size:32px; margin-top:6px;">הסיפור שלך מתחיל כאן</h1>
     <p class="tagline" id="auth-tagline" style="margin-bottom:20px;">תהליך של היכרות עצמית, בקצב שלך.</p>
 
     <!-- pay -->
@@ -582,7 +582,7 @@ function switchAuthMode(mode){
   document.getElementById('login-block').classList.toggle('hidden', !isLogin);
   document.getElementById('to-register-link').classList.toggle('hidden', !isLogin);
 
-  document.getElementById('auth-title').textContent = isPay ? 'בואי נכיר' : 'ברוכה השבה';
+  document.getElementById('auth-title').textContent = isPay ? 'הסיפור שלך מתחיל כאן' : 'ברוכה השבה';
   document.getElementById('auth-tagline').textContent = isPay ? 'תהליך של היכרות עצמית, בקצב שלך.' : 'התחברי כדי להמשיך מאיפה שעצרת.';
   document.getElementById('auth-error').textContent = '';
   document.getElementById('auth-info').textContent = '';
