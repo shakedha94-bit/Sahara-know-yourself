@@ -123,6 +123,14 @@
     padding:24px; font-family:'Heebo'; font-size:16px; line-height:1.9;
     white-space:pre-wrap; margin-top:18px; box-shadow: 0 8px 24px rgba(0,0,0,0.15);
   }
+  .feedback-box{
+    background: rgba(255,248,234,0.1); border:1px solid rgba(255,248,234,0.25);
+    border-radius:18px; padding:20px; margin-top:16px; margin-bottom:24px;
+  }
+  .feedback-label{ font-size:14px; color:var(--cream); margin-bottom:10px; text-align:center; }
+  .feedback-box textarea{ min-height:90px; font-size:14px; padding:14px; }
+  .feedback-box .btn{ width:100%; margin-top:10px; }
+  .feedback-thanks{ text-align:center; color:var(--cream); font-size:14px; opacity:0.9; }
 
   /* ---------- question ---------- */
   #view-question{ flex:1; display:flex; flex-direction:column; }
@@ -365,6 +373,15 @@
     </div>
     <h1 class="title" style="font-size:26px; text-align:center;">הסיפור שלך</h1>
     <div class="story-content" id="story-content"></div>
+    <div class="feedback-box" id="feedback-box">
+      <div id="feedback-form">
+        <p class="feedback-label">איך היה לך? אשמח לשמוע 💛</p>
+        <textarea id="feedback-text" placeholder="שתפי אותי בכמה מילים..."></textarea>
+        <div class="auth-error" id="feedback-error"></div>
+        <button class="btn btn-ghost" id="feedback-submit" onclick="handleSubmitFeedback()">שליחה</button>
+      </div>
+      <p class="feedback-thanks hidden" id="feedback-thanks">תודה שסיפרת לי! 🖤</p>
+    </div>
   </div>
 
   <!-- QUESTION -->
@@ -744,7 +761,29 @@ async function handleStoryButton(){
 
 function showStory(content){
   document.getElementById('story-content').textContent = content;
+  document.getElementById('feedback-text').value = '';
+  document.getElementById('feedback-error').textContent = '';
+  document.getElementById('feedback-form').classList.remove('hidden');
+  document.getElementById('feedback-thanks').classList.add('hidden');
   showView('story');
+}
+
+async function handleSubmitFeedback(){
+  const text = document.getElementById('feedback-text').value.trim();
+  const errEl = document.getElementById('feedback-error');
+  errEl.textContent = '';
+  if(!text){ errEl.textContent = 'נא לכתוב משהו לפני השליחה'; return; }
+
+  const btn = document.getElementById('feedback-submit');
+  btn.disabled = true;
+  try{
+    const { error } = await sb.from('feedback').insert({ user_id: currentUser.id, content: text });
+    if(error){ errEl.textContent = 'משהו השתבש, נסי שוב'; return; }
+    document.getElementById('feedback-form').classList.add('hidden');
+    document.getElementById('feedback-thanks').classList.remove('hidden');
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 function leaveStory(){
