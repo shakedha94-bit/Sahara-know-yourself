@@ -183,7 +183,6 @@
     text-decoration:underline; font-family:'Heebo'; margin-top:16px;
   }
   .auth-switch-link:hover{ opacity:1; }
-  #to-code-link{ margin-top:6px; }
 
   /* ---------- completion modal ---------- */
   .modal-overlay{
@@ -286,9 +285,8 @@
     <div style="display:flex; gap:8px; align-items:center; justify-content:center; margin-top:16px;">
       <button class="auth-switch-link" id="to-login-link" onclick="switchAuthMode('login')" style="margin-top:0;">כבר שילמת? התחברי</button>
       <span style="color:var(--cream); opacity:0.5;">|</span>
-      <button class="auth-switch-link" id="to-code-link" onclick="switchAuthMode('code')" style="margin-top:0;">אם יש לך קוד לחצי עליי</button>
+      <a class="auth-switch-link" href="https://wa.me/972525557923" target="_blank" rel="noopener" style="margin-top:0;">נתקלת בבעיה? כתבי לי</a>
     </div>
-    <a class="auth-switch-link" href="https://wa.me/972525557923" target="_blank" rel="noopener" style="margin-top:10px; display:block;">נתקלת בבעיה? כתבי לי</a>
 
     <!-- login -->
     <div class="auth-card hidden" id="login-block">
@@ -298,16 +296,6 @@
       <button class="btn btn-primary" id="auth-submit" onclick="handleLoginSubmit()">התחברי</button>
     </div>
     <button class="auth-switch-link hidden" id="to-register-link" onclick="switchAuthMode('pay')">עדיין לא שילמת? למעבר לתשלום</button>
-
-    <!-- code signup -->
-    <div class="auth-card hidden" id="code-block">
-      <input id="code-email" type="email" placeholder="אימייל" autocomplete="email">
-      <input id="code-password" type="password" placeholder="בחרי סיסמה" autocomplete="new-password">
-      <input id="code-code" type="text" placeholder="קוד גישה" autocomplete="off" style="letter-spacing:0.05em;">
-      <div class="auth-error" id="code-error"></div>
-      <button class="btn btn-primary" id="code-submit" onclick="handleCodeSignup()">כניסה עם קוד</button>
-    </div>
-    <button class="auth-switch-link hidden" id="to-pay-from-code-link" onclick="switchAuthMode('pay')">אין לך קוד? למעבר לתשלום</button>
   </div>
 
   <!-- SET PASSWORD (first login after payment) -->
@@ -527,24 +515,17 @@ function switchAuthMode(mode){
   authMode = mode;
   const isPay = mode === 'pay';
   const isLogin = mode === 'login';
-  const isCode = mode === 'code';
 
   document.getElementById('pay-block').classList.toggle('hidden', !isPay);
   document.getElementById('privacy-note').classList.toggle('hidden', !isPay);
   document.getElementById('to-login-link').classList.toggle('hidden', !isPay);
-  document.getElementById('to-code-link').classList.toggle('hidden', !isPay);
 
   document.getElementById('login-block').classList.toggle('hidden', !isLogin);
   document.getElementById('to-register-link').classList.toggle('hidden', !isLogin);
 
-  document.getElementById('code-block').classList.toggle('hidden', !isCode);
-  document.getElementById('to-pay-from-code-link').classList.toggle('hidden', !isCode);
-
-  document.getElementById('auth-title').textContent = isPay ? 'בואי נכיר' : (isLogin ? 'ברוכה השבה' : 'כניסה עם קוד');
-  document.getElementById('auth-tagline').textContent = isPay ? 'תהליך של היכרות עצמית, בקצב שלך.' : (isLogin ? 'התחברי כדי להמשיך מאיפה שעצרת.' : 'יש לך קוד גישה? בחרי מייל וסיסמה כדי להתחיל.');
+  document.getElementById('auth-title').textContent = isPay ? 'בואי נכיר' : 'ברוכה השבה';
+  document.getElementById('auth-tagline').textContent = isPay ? 'תהליך של היכרות עצמית, בקצב שלך.' : 'התחברי כדי להמשיך מאיפה שעצרת.';
   document.getElementById('auth-error').textContent = '';
-  const codeErr = document.getElementById('code-error');
-  if(codeErr) codeErr.textContent = '';
 }
 
 function translateAuthError(error){
@@ -580,34 +561,6 @@ sb.auth.onAuthStateChange((event, session) => {
     showView('setpass');
   }
 });
-
-async function handleCodeSignup(){
-  const email = document.getElementById('code-email').value.trim();
-  const password = document.getElementById('code-password').value;
-  const code = document.getElementById('code-code').value.trim().toUpperCase();
-  const errEl = document.getElementById('code-error');
-  errEl.textContent = '';
-  if(!email || !password || !code){ errEl.textContent = 'נא למלא את כל השדות'; return; }
-
-  const btn = document.getElementById('code-submit');
-  btn.disabled = true;
-  try{
-    const { data, error } = await sb.auth.signUp({ email, password });
-    if(error){ errEl.textContent = translateAuthError(error); return; }
-    if(!data.session){
-      errEl.textContent = 'ההרשמה בוצעה אך יש לאשר מייל לפני התחברות.';
-      return;
-    }
-    const { data: redeemed, error: redeemErr } = await sb.rpc('redeem_access_code', { p_code: code });
-    if(redeemErr || !redeemed){
-      errEl.textContent = 'הקוד לא תקין או שכבר נוצל. בדקי את הקוד או פני אלינו.';
-      return;
-    }
-    await onLoggedIn(data.user);
-  } finally {
-    btn.disabled = false;
-  }
-}
 
 async function handleLoginSubmit(){
   const email = document.getElementById('auth-email').value.trim();
