@@ -300,7 +300,7 @@
     </div>
     <div style="display:flex; gap:8px; align-items:center; justify-content:center; margin-top:16px;">
       <button class="auth-switch-link" id="to-login-link" onclick="switchAuthMode('login')" style="margin-top:0;">כבר שילמת? התחברי</button>
-      <span style="color:var(--cream); opacity:0.5;">|</span>
+      <span class="auth-switch-link" id="pay-link-sep" style="color:var(--cream); opacity:0.5; margin-top:0;">|</span>
       <a class="auth-switch-link" href="https://wa.me/972525557923" target="_blank" rel="noopener" style="margin-top:0;">נתקלת בבעיה? כתבי לי</a>
     </div>
 
@@ -309,7 +309,9 @@
       <input id="auth-email" type="email" placeholder="אימייל" autocomplete="email">
       <input id="auth-password" type="password" placeholder="סיסמה" autocomplete="current-password">
       <div class="auth-error" id="auth-error"></div>
+      <div class="auth-info" id="auth-info"></div>
       <button class="btn btn-primary" id="auth-submit" onclick="handleLoginSubmit()">התחברי</button>
+      <button class="auth-switch-link" id="forgot-password-link" onclick="handleForgotPassword()" style="margin-top:0;">שכחת סיסמה?</button>
     </div>
     <button class="auth-switch-link hidden" id="to-register-link" onclick="switchAuthMode('pay')">עדיין לא שילמת? למעבר לתשלום</button>
   </div>
@@ -569,6 +571,7 @@ function switchAuthMode(mode){
   document.getElementById('pay-block').classList.toggle('hidden', !isPay);
   document.getElementById('privacy-note').classList.toggle('hidden', !isPay);
   document.getElementById('to-login-link').classList.toggle('hidden', !isPay);
+  document.getElementById('pay-link-sep').classList.toggle('hidden', !isPay);
 
   document.getElementById('login-block').classList.toggle('hidden', !isLogin);
   document.getElementById('to-register-link').classList.toggle('hidden', !isLogin);
@@ -576,6 +579,7 @@ function switchAuthMode(mode){
   document.getElementById('auth-title').textContent = isPay ? 'בואי נכיר' : 'ברוכה השבה';
   document.getElementById('auth-tagline').textContent = isPay ? 'תהליך של היכרות עצמית, בקצב שלך.' : 'התחברי כדי להמשיך מאיפה שעצרת.';
   document.getElementById('auth-error').textContent = '';
+  document.getElementById('auth-info').textContent = '';
 }
 
 function translateAuthError(error){
@@ -611,6 +615,25 @@ sb.auth.onAuthStateChange((event, session) => {
     showView('setpass');
   }
 });
+
+async function handleForgotPassword(){
+  const email = document.getElementById('auth-email').value.trim();
+  const errEl = document.getElementById('auth-error');
+  const infoEl = document.getElementById('auth-info');
+  errEl.textContent = '';
+  infoEl.textContent = '';
+  if(!email){ errEl.textContent = 'נא להזין קודם את כתובת המייל שלך למעלה'; return; }
+
+  const link = document.getElementById('forgot-password-link');
+  link.disabled = true;
+  try{
+    const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
+    if(error){ errEl.textContent = translateAuthError(error); return; }
+    infoEl.textContent = 'נשלח מייל לאיפוס סיסמה - בדקי את תיבת הדואר שלך.';
+  } finally {
+    link.disabled = false;
+  }
+}
 
 async function handleLoginSubmit(){
   const email = document.getElementById('auth-email').value.trim();
