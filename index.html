@@ -43,6 +43,10 @@
   h1.title{ font-family:'Suez One', serif; font-size:40px; text-align:center; line-height:1.2; margin: 10px 0 8px; }
   .tagline{ text-align:center; font-size:14.5px; color:var(--cream); opacity:0.85; max-width:420px; margin:0 auto; line-height:1.7;}
 
+  .testimonial-carousel{ width:100%; max-width:340px; margin:16px auto 2px; min-height:60px; display:flex; flex-direction:column; gap:6px; align-items:center; justify-content:center; transition:opacity 0.4s ease; }
+  .testimonial-quote{ font-size:13px; color:var(--cream); opacity:0.9; line-height:1.6; font-style:italic; }
+  .testimonial-name{ font-size:12px; color:var(--cream); opacity:0.6; font-weight:700; }
+
   .btn{
     font-family:'Heebo'; font-weight:700; font-size:15px; border:none; border-radius:14px;
     padding: 15px 22px; cursor:pointer; transition: transform 0.15s, opacity 0.15s;
@@ -273,6 +277,11 @@
     <h1 class="title" id="auth-title" style="font-size:32px; margin-top:6px;">בואי נכיר</h1>
     <p class="tagline" id="auth-tagline" style="margin-bottom:20px;">תהליך של היכרות עצמית, בקצב שלך.</p>
 
+    <div class="testimonial-carousel" id="testimonial-carousel">
+      <p class="testimonial-quote" id="testimonial-quote"></p>
+      <p class="testimonial-name" id="testimonial-name"></p>
+    </div>
+
     <!-- pay -->
     <div id="pay-block">
       <p style="font-size:13px; opacity:0.75; margin-bottom:10px;">לחצי כאן לתשלום:</p>
@@ -384,6 +393,31 @@
 const SUPABASE_URL = 'https://zbzhsqcuubbeemhlblvq.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_-CJmYjnunQheOi9y2hqpmA_YlJ6aWrA';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const TESTIMONIALS = [
+  { quote: 'השאלות גורמות לעצור ולחשוב על דברים שלא תמיד עוצרים לחשוב עליהם.', name: 'אור' },
+  { quote: 'ואו ואו ואו תודה לך על זה!!!', name: 'טל' },
+  { quote: 'רגע לענות על שאלות ולקבל הארה - זה באמת מתנה!', name: 'ירדן' },
+  { quote: 'חוויה מעוררת מחשבה - הסיפור תפור עלי.', name: 'הילה' },
+  { quote: 'הוא מציג אותי באור חיובי ומבליט את החוזקות שלי.', name: 'שרון' },
+];
+let testimonialIdx = 0;
+function renderTestimonial(){
+  const wrap = document.getElementById('testimonial-carousel');
+  const q = document.getElementById('testimonial-quote');
+  const n = document.getElementById('testimonial-name');
+  if(!wrap) return;
+  wrap.style.opacity = '0';
+  setTimeout(()=>{
+    const t = TESTIMONIALS[testimonialIdx];
+    q.textContent = '"' + t.quote + '"';
+    n.textContent = '— ' + t.name;
+    wrap.style.opacity = '1';
+    testimonialIdx = (testimonialIdx + 1) % TESTIMONIALS.length;
+  }, 400);
+}
+renderTestimonial();
+setInterval(renderTestimonial, 6000);
 
 const CHAPTERS = [
   {
