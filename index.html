@@ -230,7 +230,7 @@
   .register-form input::placeholder{ color: rgba(255,248,234,0.65); }
   .reg-check{ display:flex; align-items:flex-start; gap:10px; text-align:right; font-size:13px; color:var(--cream); opacity:0.9; margin-top:4px; cursor:pointer; }
   .reg-check input{ margin-top:3px; width:16px; height:16px; flex-shrink:0; }
-  .privacy-note{ font-size:11.5px; opacity:0.65; max-width:300px; margin-top:22px; line-height:1.7; }
+  .privacy-note{ font-size:11.5px; opacity:0.65; max-width:300px; margin:22px auto 0; line-height:1.7; }
 </style>
 <!-- Meta Pixel Code -->
 <script>
@@ -309,7 +309,7 @@ src="https://www.facebook.com/tr?id=2132119363993562&ev=PageView&noscript=1"
     <p class="tagline" id="auth-tagline" style="margin-bottom:20px;">תהליך של היכרות עצמית, בקצב שלך.</p>
 
     <!-- pay -->
-    <div id="pay-block">
+    <div id="pay-block" style="width:100%; max-width:340px; margin:0 auto;">
       <p style="font-size:13px; opacity:0.75; margin-bottom:10px;">לחצי כאן לתשלום:</p>
       <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
         <a class="btn btn-primary" href="https://pay.grow.link/50620ab007644d472b300ee20a312a46-MTk3MzU5NA" target="_blank" rel="noopener" onclick="if(typeof fbq==='function'){fbq('track','Lead');}">29 ש"ח בלבד</a>
@@ -321,9 +321,9 @@ src="https://www.facebook.com/tr?id=2132119363993562&ev=PageView&noscript=1"
         <p class="testimonial-name" id="testimonial-name"></p>
       </div>
     </div>
-    <div style="display:flex; gap:8px; align-items:center; justify-content:center; margin-top:16px;">
+    <div id="pay-links-row" style="display:flex; gap:8px; align-items:center; justify-content:center; margin-top:16px;">
       <button class="auth-switch-link" id="to-login-link" onclick="switchAuthMode('login')" style="margin-top:0;">כבר שילמת? התחברי</button>
-      <span class="auth-switch-link" id="pay-link-sep" style="color:var(--cream); opacity:0.5; margin-top:0;">|</span>
+      <span class="auth-switch-link" style="color:var(--cream); opacity:0.5; margin-top:0;">|</span>
       <a class="auth-switch-link" href="https://wa.me/972525557923" target="_blank" rel="noopener" style="margin-top:0;">נתקלת בבעיה? כתבי לי</a>
     </div>
 
@@ -331,12 +331,16 @@ src="https://www.facebook.com/tr?id=2132119363993562&ev=PageView&noscript=1"
     <div class="auth-card hidden" id="login-block">
       <input id="auth-email" type="email" placeholder="אימייל" autocomplete="email">
       <input id="auth-password" type="password" placeholder="סיסמה" autocomplete="current-password">
+      <button class="auth-switch-link" id="forgot-password-link" onclick="handleForgotPassword()" style="margin-top:0;">שכחת סיסמה?</button>
       <div class="auth-error" id="auth-error"></div>
       <div class="auth-info" id="auth-info"></div>
       <button class="btn btn-primary" id="auth-submit" onclick="handleLoginSubmit()">התחברי</button>
-      <button class="auth-switch-link" id="forgot-password-link" onclick="handleForgotPassword()" style="margin-top:0;">שכחת סיסמה?</button>
     </div>
-    <button class="auth-switch-link hidden" id="to-register-link" onclick="switchAuthMode('pay')">עדיין לא שילמת? למעבר לתשלום</button>
+    <div id="login-links-row" class="hidden" style="display:flex; gap:8px; align-items:center; justify-content:center; margin-top:16px;">
+      <button class="auth-switch-link" id="to-register-link" onclick="switchAuthMode('pay')" style="margin-top:0;">עדיין לא שילמת? למעבר לתשלום</button>
+      <span class="auth-switch-link" style="color:var(--cream); opacity:0.5; margin-top:0;">|</span>
+      <a class="auth-switch-link" href="https://wa.me/972525557923" target="_blank" rel="noopener" style="margin-top:0;">נתקלת בבעיה? כתבי לי</a>
+    </div>
   </div>
 
   <!-- SET PASSWORD (first login after payment) -->
@@ -599,11 +603,10 @@ function switchAuthMode(mode){
 
   document.getElementById('pay-block').classList.toggle('hidden', !isPay);
   document.getElementById('privacy-note').classList.toggle('hidden', !isPay);
-  document.getElementById('to-login-link').classList.toggle('hidden', !isPay);
-  document.getElementById('pay-link-sep').classList.toggle('hidden', !isPay);
+  document.getElementById('pay-links-row').classList.toggle('hidden', !isPay);
 
   document.getElementById('login-block').classList.toggle('hidden', !isLogin);
-  document.getElementById('to-register-link').classList.toggle('hidden', !isLogin);
+  document.getElementById('login-links-row').classList.toggle('hidden', !isLogin);
 
   document.getElementById('auth-title').textContent = isPay ? 'הסיפור שלך מתחיל כאן' : 'ברוכה השבה';
   document.getElementById('auth-tagline').textContent = isPay ? 'תהליך של היכרות עצמית, בקצב שלך.' : 'התחברי כדי להמשיך מאיפה שעצרת.';
