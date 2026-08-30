@@ -402,6 +402,7 @@ src="https://www.facebook.com/tr?id=2132119363993562&ev=PageView&noscript=1"
     </div>
     <h1 class="title" style="font-size:26px; text-align:center;">הסיפור שלך</h1>
     <div class="story-content" id="story-content"></div>
+    <button class="btn btn-ghost" style="width:100%; margin-top:14px;" onclick="shareStorySnippet()" id="share-story-btn">שיתוף</button>
     <div class="feedback-box" id="feedback-box">
       <div id="feedback-form">
         <p class="feedback-label">איך היה לך? אשמח לשמוע 💛</p>
@@ -815,7 +816,10 @@ async function handleStoryButton(){
   }
 }
 
+let currentStoryText = '';
+
 function showStory(content){
+  currentStoryText = content;
   document.getElementById('story-content').textContent = content;
   document.getElementById('feedback-text').value = '';
   document.getElementById('feedback-name').value = '';
@@ -841,6 +845,115 @@ async function handleSubmitFeedback(){
     document.getElementById('feedback-thanks').classList.remove('hidden');
   } finally {
     btn.disabled = false;
+  }
+}
+
+function extractQuote(text){
+  let para = (text || '').trim().split(/\n+/)[0].trim();
+  if(para.length > 220){
+    const cut = para.slice(0, 220);
+    const lastSpace = cut.lastIndexOf(' ');
+    para = cut.slice(0, lastSpace > 150 ? lastSpace : 220) + '...';
+  }
+  return para;
+}
+
+function wrapCanvasText(ctx, text, maxWidth){
+  const words = text.split(' ');
+  const lines = [];
+  let line = '';
+  for(const w of words){
+    const test = line ? line + ' ' + w : w;
+    if(ctx.measureText(test).width > maxWidth && line){
+      lines.push(line);
+      line = w;
+    } else {
+      line = test;
+    }
+  }
+  if(line) lines.push(line);
+  return lines;
+}
+
+async function buildQuoteCard(quote){
+  const W = 1080, H = 1920;
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  const bg = ctx.createRadialGradient(W*0.3, H*0.08, 0, W*0.3, H*0.08, W*1.1);
+  bg.addColorStop(0, '#B57A50');
+  bg.addColorStop(0.45, '#A4643E');
+  bg.addColorStop(1, '#7E4E30');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  try{
+    await document.fonts.load('700 60px "Suez One"');
+    await document.fonts.load('700 34px "Heebo"');
+  }catch(e){}
+
+  const R = 150, CX = W/2, CY = 330;
+  ctx.beginPath(); ctx.arc(CX, CY, R, 0, Math.PI*2); ctx.fillStyle = '#FFF8EA'; ctx.fill();
+  ctx.beginPath(); ctx.arc(CX + R*0.38, CY, R, 0, Math.PI*2); ctx.fillStyle = '#7E4E30'; ctx.fill();
+
+  ctx.direction = 'rtl';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#FFF8EA';
+  ctx.font = '700 34px "Heebo", sans-serif';
+  ctx.globalAlpha = 0.85;
+  ctx.fillText('סַהֲרָה', CX, CY + R + 90);
+  ctx.globalAlpha = 1;
+
+  ctx.font = '400 56px "Suez One", serif';
+  const maxWidth = W - 180;
+  const lines = wrapCanvasText(ctx, '"' + quote + '"', maxWidth);
+  const lineHeight = 78;
+  let y = CY + R + 240;
+  lines.forEach(line=>{
+    ctx.fillText(line, CX, y);
+    y += lineHeight;
+  });
+
+  ctx.font = '700 30px "Heebo", sans-serif';
+  ctx.globalAlpha = 0.75;
+  ctx.fillText('מתוך הסיפור האישי שלי - sahara-know-yourself.netlify.app', CX, H - 110);
+  ctx.globalAlpha = 1;
+
+  return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+}
+
+async function shareStorySnippet(){
+  const btn = document.getElementById('share-story-btn');
+  btn.disabled = true;
+  const originalLabel = btn.textContent;
+  btn.textContent = 'מכינה תמונה...';
+  try{
+    const quote = extractQuote(currentStoryText);
+    const blob = await buildQuoteCard(quote);
+    const file = new File([blob], 'sahara-story.png', { type: 'image/png' });
+
+    if(navigator.canShare && navigator.canShare({ files: [file] })){
+      await navigator.share({
+        files: [file],
+        title: 'סַהֲרָה - הסיפור שלי',
+        text: 'ענתה לי הרבה על עצמי 💛'
+      });
+    } else {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'sahara-story.png';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url), 5000);
+    }
+  } catch(e){
+    if(e.name !== 'AbortError'){ alert('משהו השתבש בשיתוף, נסי שוב'); }
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalLabel;
   }
 }
 
