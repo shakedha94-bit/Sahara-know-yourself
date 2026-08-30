@@ -927,7 +927,7 @@ async function buildQuoteCard(quote){
     await document.fonts.load('700 34px "Heebo"');
   }catch(e){}
 
-  const R = 95, CX = W/2, CY = 260;
+  const R = 62, CX = W/2, CY = 210;
   const MCX = CX + R*0.41;
   ctx.beginPath(); ctx.arc(MCX, CY, R, 0, Math.PI*2); ctx.fillStyle = '#FFF8EA'; ctx.fill();
   ctx.save();
@@ -943,14 +943,14 @@ async function buildQuoteCard(quote){
   ctx.fillStyle = '#FFF8EA';
   ctx.font = '700 34px "Heebo", sans-serif';
   ctx.globalAlpha = 0.85;
-  ctx.fillText('סַהֲרָה', CX, CY + R + 65);
+  ctx.fillText('סַהֲרָה', CX, CY + R + 55);
   ctx.globalAlpha = 1;
 
   ctx.font = '400 56px "Suez One", serif';
   const maxWidth = W - 180;
   const lines = wrapCanvasText(ctx, '"' + quote + '"', maxWidth);
   const lineHeight = 78;
-  let y = CY + R + 175;
+  let y = CY + R + 150;
   lines.forEach(line=>{
     ctx.fillText(line, CX, y);
     y += lineHeight;
