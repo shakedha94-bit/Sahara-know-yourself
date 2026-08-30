@@ -389,11 +389,11 @@ src="https://www.facebook.com/tr?id=2132119363993562&ev=PageView&noscript=1"
     <svg class="moon-hero" viewBox="0 0 100 100">
       <defs>
         <mask id="moonHeroMask">
-          <circle cx="50" cy="50" r="42" fill="#fff"/>
-          <circle cx="66" cy="50" r="42" fill="#000"/>
+          <circle cx="67" cy="50" r="42" fill="#fff"/>
+          <circle cx="83" cy="50" r="42" fill="#000"/>
         </mask>
       </defs>
-      <circle cx="50" cy="50" r="42" fill="#FFF8EA" mask="url(#moonHeroMask)"/>
+      <circle cx="67" cy="50" r="42" fill="#FFF8EA" mask="url(#moonHeroMask)"/>
     </svg>
     <div>
       <h1 class="title">סַהֲרָה<br>להכיר את עצמך</h1>
@@ -927,7 +927,7 @@ async function buildQuoteCard(quote){
     await document.fonts.load('700 34px "Heebo"');
   }catch(e){}
 
-  const R = 150, CX = W/2, CY = 330;
+  const R = 95, CX = W/2, CY = 260;
   const MCX = CX + R*0.41;
   ctx.beginPath(); ctx.arc(MCX, CY, R, 0, Math.PI*2); ctx.fillStyle = '#FFF8EA'; ctx.fill();
   ctx.save();
@@ -943,14 +943,14 @@ async function buildQuoteCard(quote){
   ctx.fillStyle = '#FFF8EA';
   ctx.font = '700 34px "Heebo", sans-serif';
   ctx.globalAlpha = 0.85;
-  ctx.fillText('סַהֲרָה', CX, CY + R + 90);
+  ctx.fillText('סַהֲרָה', CX, CY + R + 65);
   ctx.globalAlpha = 1;
 
   ctx.font = '400 56px "Suez One", serif';
   const maxWidth = W - 180;
   const lines = wrapCanvasText(ctx, '"' + quote + '"', maxWidth);
   const lineHeight = 78;
-  let y = CY + R + 240;
+  let y = CY + R + 175;
   lines.forEach(line=>{
     ctx.fillText(line, CX, y);
     y += lineHeight;
