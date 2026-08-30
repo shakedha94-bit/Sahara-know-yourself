@@ -307,9 +307,9 @@ src="https://www.facebook.com/tr?id=2132119363993562&ev=PageView&noscript=1"
       <h2 class="modal-title" style="font-size:20px;">איזה משפט לשתף?</h2>
       <p class="modal-text" style="text-align:center; opacity:0.75;">דפדפי בין הקטעים ובחרי את זה שהכי מדבר אלייך</p>
       <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-top:10px;">
-        <button class="btn btn-ghost" onclick="cycleShareCandidate(1)" aria-label="הקטע הבא" style="padding:12px 16px;">←</button>
+        <button class="btn btn-ghost" onclick="cycleShareCandidate(1)" aria-label="הקטע הבא" style="padding:12px 16px;">→</button>
         <img id="share-preview-img" style="width:100%; max-width:260px; border-radius:12px; display:block;">
-        <button class="btn btn-ghost" onclick="cycleShareCandidate(-1)" aria-label="הקטע הקודם" style="padding:12px 16px;">→</button>
+        <button class="btn btn-ghost" onclick="cycleShareCandidate(-1)" aria-label="הקטע הקודם" style="padding:12px 16px;">←</button>
       </div>
       <div class="progress-hint" id="share-candidate-count" style="text-align:center; margin-top:8px;"></div>
       <button class="btn btn-primary" style="margin-top:14px;" onclick="confirmShare()" id="share-confirm-btn">שיתוף</button>
@@ -930,8 +930,11 @@ async function buildQuoteCard(quote){
   const R = 150, CX = W/2, CY = 330;
   ctx.beginPath(); ctx.arc(CX, CY, R, 0, Math.PI*2); ctx.fillStyle = '#FFF8EA'; ctx.fill();
   ctx.save();
-  ctx.globalCompositeOperation = 'destination-out';
-  ctx.beginPath(); ctx.arc(CX + R*0.38, CY, R, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath();
+  ctx.arc(CX + R*0.38, CY, R, 0, Math.PI*2);
+  ctx.clip();
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
   ctx.restore();
 
   ctx.direction = 'rtl';
