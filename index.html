@@ -928,10 +928,11 @@ async function buildQuoteCard(quote){
   }catch(e){}
 
   const R = 150, CX = W/2, CY = 330;
-  ctx.beginPath(); ctx.arc(CX, CY, R, 0, Math.PI*2); ctx.fillStyle = '#FFF8EA'; ctx.fill();
+  const MCX = CX + R*0.41;
+  ctx.beginPath(); ctx.arc(MCX, CY, R, 0, Math.PI*2); ctx.fillStyle = '#FFF8EA'; ctx.fill();
   ctx.save();
   ctx.beginPath();
-  ctx.arc(CX + R*0.38, CY, R, 0, Math.PI*2);
+  ctx.arc(MCX + R*0.38, CY, R, 0, Math.PI*2);
   ctx.clip();
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, W, H);
