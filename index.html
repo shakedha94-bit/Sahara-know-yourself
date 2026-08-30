@@ -927,7 +927,24 @@ async function buildQuoteCard(quote){
     await document.fonts.load('700 34px "Heebo"');
   }catch(e){}
 
-  const R = 27, CX = W/2, CY = 150;
+  const R = 27, CX = W/2;
+  const gapMoonToBrand = 42;
+  const brandHeight = 34;
+  const gapBrandToQuote = 110;
+  const lineHeight = 78;
+
+  ctx.direction = 'rtl';
+  ctx.textAlign = 'center';
+  ctx.font = '400 56px "Suez One", serif';
+  const maxWidth = W - 180;
+  const lines = wrapCanvasText(ctx, '"' + quote + '"', maxWidth);
+
+  const moonBlockHeight = R*2 + gapMoonToBrand + brandHeight + gapBrandToQuote;
+  const quoteBlockHeight = lines.length * lineHeight;
+  const totalHeight = moonBlockHeight + quoteBlockHeight;
+  const startY = (H - totalHeight) / 2;
+
+  const CY = startY + R;
   const MCX = CX + R*0.41;
   ctx.beginPath(); ctx.arc(MCX, CY, R, 0, Math.PI*2); ctx.fillStyle = '#FFF8EA'; ctx.fill();
   ctx.save();
@@ -938,19 +955,14 @@ async function buildQuoteCard(quote){
   ctx.fillRect(0, 0, W, H);
   ctx.restore();
 
-  ctx.direction = 'rtl';
-  ctx.textAlign = 'center';
   ctx.fillStyle = '#FFF8EA';
   ctx.font = '700 34px "Heebo", sans-serif';
   ctx.globalAlpha = 0.85;
-  ctx.fillText('סַהֲרָה', CX, CY + R + 45);
+  ctx.fillText('סַהֲרָה', CX, CY + R + gapMoonToBrand);
   ctx.globalAlpha = 1;
 
   ctx.font = '400 56px "Suez One", serif';
-  const maxWidth = W - 180;
-  const lines = wrapCanvasText(ctx, '"' + quote + '"', maxWidth);
-  const lineHeight = 78;
-  let y = CY + R + 130;
+  let y = CY + R + gapMoonToBrand + gapBrandToQuote;
   lines.forEach(line=>{
     ctx.fillText(line, CX, y);
     y += lineHeight;
