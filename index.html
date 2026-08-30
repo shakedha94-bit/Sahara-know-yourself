@@ -386,7 +386,7 @@ src="https://www.facebook.com/tr?id=2132119363993562&ev=PageView&noscript=1"
 
   <!-- WELCOME -->
   <div id="view-welcome" class="hidden">
-    <svg class="moon-hero" viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="#FFF8EA"/><circle cx="66" cy="50" r="42" fill="#A4643E"/></svg>
+    <svg class="moon-hero" viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="#FFF8EA"/></svg>
     <div>
       <h1 class="title">סַהֲרָה<br>להכיר את עצמך</h1>
       <p class="tagline">לכתוב את הסיפור שלך, להכיר את מי שהיית, את מי שאת עכשיו ואת מי שאת רוצה להיות. ברוכה הבאה.</p>
@@ -921,7 +921,6 @@ async function buildQuoteCard(quote){
 
   const R = 150, CX = W/2, CY = 330;
   ctx.beginPath(); ctx.arc(CX, CY, R, 0, Math.PI*2); ctx.fillStyle = '#FFF8EA'; ctx.fill();
-  ctx.beginPath(); ctx.arc(CX + R*0.38, CY, R, 0, Math.PI*2); ctx.fillStyle = '#7E4E30'; ctx.fill();
 
   ctx.direction = 'rtl';
   ctx.textAlign = 'center';
