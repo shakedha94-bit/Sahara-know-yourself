@@ -29,7 +29,7 @@
   html,body{ height:100%; }
   body{
     font-family:'Heebo', sans-serif;
-    background: radial-gradient(circle at 30% 10%, #B57A50 0%, var(--terracotta) 45%, var(--terracotta-dark) 100%);
+    background: var(--terracotta);
     color: var(--cream);
     min-height:100vh;
     overflow-x:hidden;
@@ -915,10 +915,7 @@ async function buildQuoteCard(quote){
   canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d');
 
-  const bg = ctx.createRadialGradient(W*0.3, H*0.08, 0, W*0.3, H*0.08, W*1.1);
-  bg.addColorStop(0, '#B57A50');
-  bg.addColorStop(0.45, '#A4643E');
-  bg.addColorStop(1, '#7E4E30');
+  const bg = '#A4643E';
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, W, H);
 
