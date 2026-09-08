@@ -465,7 +465,7 @@ src="https://www.facebook.com/tr?id=2132119363993562&ev=PageView&noscript=1"
 <script>
 const SUPABASE_URL = 'https://zbzhsqcuubbeemhlblvq.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_-CJmYjnunQheOi9y2hqpmA_YlJ6aWrA';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { flowType: 'pkce' } });
 
 const TESTIMONIALS = [
   { quote: 'השאלות גורמות לעצור ולחשוב על דברים שלא תמיד עוצרים לחשוב עליהם.', name: 'אור' },
