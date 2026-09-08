@@ -363,12 +363,13 @@ src="https://www.facebook.com/tr?id=2132119363993562&ev=PageView&noscript=1"
   <div id="view-setpass" class="hidden">
     <div class="brandmark" style="margin-top:10px;"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="#FFF8EA"/></svg><span>סַהֲרָה</span></div>
     <h1 class="title" style="font-size:30px; margin-top:6px;">כמעט שם</h1>
-    <p class="tagline" style="margin-bottom:20px;">בחרי סיסמה כדי להשלים את הכניסה שלך.</p>
+    <p class="tagline" style="margin-bottom:20px;">בחרי סיסמה משלך - כדי שהחשבון והמרחב הפרטי שלך יהיו נגישים רק לך, בכל כניסה הבאה.</p>
     <div class="auth-card">
       <input id="setpass-password" type="password" placeholder="סיסמה חדשה" autocomplete="new-password">
       <div class="auth-error" id="setpass-error"></div>
       <button class="btn btn-primary" id="setpass-submit" onclick="handleSetPassword()">שמירה והתחלה</button>
     </div>
+    <button class="auth-switch-link" onclick="handleSkipSetPassword()">לדלג לעכשיו</button>
   </div>
 
   <!-- GATE -->
@@ -656,13 +657,17 @@ async function handleSetPassword(){
   const btn = document.getElementById('setpass-submit');
   btn.disabled = true;
   try{
-    const { data, error } = await sb.auth.updateUser({ password });
+    const { data, error } = await sb.auth.updateUser({ password, data: { password_set: true } });
     if(error){ errEl.textContent = translateAuthError(error); return; }
     if(typeof fbq === 'function'){ fbq('track', 'Purchase', {value: 29.00, currency: 'ILS'}); }
     await onLoggedIn(data.user);
   } finally {
     btn.disabled = false;
   }
+}
+
+function handleSkipSetPassword(){
+  continueAfterLogin(currentUser);
 }
 
 sb.auth.onAuthStateChange((event, session) => {
@@ -712,6 +717,17 @@ async function handleLoginSubmit(){
 }
 
 async function onLoggedIn(user){
+  currentUser = user;
+  if(!user.user_metadata?.password_set){
+    document.getElementById('setpass-password').value = '';
+    document.getElementById('setpass-error').textContent = '';
+    showView('setpass');
+    return;
+  }
+  await continueAfterLogin(user);
+}
+
+async function continueAfterLogin(user){
   currentUser = user;
   document.getElementById('topbar').classList.remove('hidden');
   const unlocked = await checkUnlocked();
