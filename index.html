@@ -1239,7 +1239,8 @@ function prevQuestion(){
 }
 
 async function init(){
-  if(window.location.hash.includes('type=recovery')){
+  const params = new URLSearchParams(window.location.search);
+  if(window.location.hash.includes('type=recovery') || params.get('type') === 'recovery'){
     return; // handled by the PASSWORD_RECOVERY listener above
   }
   const { data: { session } } = await sb.auth.getSession();
