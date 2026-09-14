@@ -255,7 +255,22 @@ src="https://www.facebook.com/tr?id=2132119363993562&ev=PageView&noscript=1"
 
   <div class="topbar hidden" id="topbar">
     <button class="signout-btn" onclick="showAboutModal()">איך זה עובד?</button>
+    <button class="signout-btn" id="save-access-btn" onclick="showUpgradeModal()" style="display:none;">שמרי גישה קבועה</button>
     <button class="signout-btn" onclick="signOut()">התנתקות</button>
+  </div>
+
+  <!-- SAVE PERMANENT ACCESS (anonymous gift users only) -->
+  <div id="upgrade-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="brandmark"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="#FFF8EA"/></svg><span>סַהֲרָה</span></div>
+      <h2 class="modal-title">שמרי גישה קבועה</h2>
+      <p class="modal-text">הוסיפי מייל וסיסמה כדי שתוכלי להתחבר תמיד, גם ממכשיר אחר. כל מה שכתבת עד עכשיו יישאר בדיוק כמו שהוא.</p>
+      <input id="upgrade-email" type="email" placeholder="אימייל" autocomplete="email" style="width:100%; margin-bottom:10px; text-align:center;">
+      <input id="upgrade-password" type="password" placeholder="בחרי סיסמה" autocomplete="new-password" style="width:100%; margin-bottom:10px; text-align:center;">
+      <div class="auth-error" id="upgrade-error"></div>
+      <button class="btn btn-primary" onclick="handleUpgradeAccount(this)">שמירה</button>
+      <button class="btn btn-ghost" onclick="closeUpgradeModal()">אולי מאוחר יותר</button>
+    </div>
   </div>
 
   <!-- COMPLETION MODAL -->
@@ -718,7 +733,7 @@ async function handleLoginSubmit(){
 
 async function onLoggedIn(user){
   currentUser = user;
-  if(!user.user_metadata?.password_set){
+  if(!user.is_anonymous && !user.user_metadata?.password_set){
     document.getElementById('setpass-password').value = '';
     document.getElementById('setpass-error').textContent = '';
     showView('setpass');
@@ -730,6 +745,8 @@ async function onLoggedIn(user){
 async function continueAfterLogin(user){
   currentUser = user;
   document.getElementById('topbar').classList.remove('hidden');
+  const saveBtn = document.getElementById('save-access-btn');
+  if(saveBtn) saveBtn.style.display = currentUser?.is_anonymous ? 'inline-block' : 'none';
   const unlocked = await checkUnlocked();
   if(!unlocked){
     document.getElementById('gate-code').value = '';
@@ -739,6 +756,67 @@ async function continueAfterLogin(user){
   }
   await loadAnswersFromDB();
   showView('welcome');
+}
+
+/* ---------- gift links (?gift=CODE) ---------- */
+async function handleGiftEntry(code){
+  try{
+    const { data: signInData, error: signInErr } = await sb.auth.signInAnonymously();
+    if(signInErr || !signInData?.user){
+      console.error('anonymous sign-in failed', signInErr);
+      showView('auth');
+      return;
+    }
+    const { data, error } = await sb.rpc('redeem_access_code', { p_code: code.trim().toUpperCase() });
+    if(error || !data){
+      console.error('gift code redeem failed', error);
+      currentUser = signInData.user;
+      document.getElementById('topbar').classList.remove('hidden');
+      document.getElementById('gate-code').value = code;
+      document.getElementById('gate-error').textContent = 'הקוד לא תקין או שכבר נוצל. בדקי את הקוד או פני אלינו.';
+      showView('gate');
+      return;
+    }
+    await continueAfterLogin(signInData.user);
+  } catch(e){
+    console.error('gift entry error', e);
+    showView('auth');
+  }
+}
+
+/* ---------- save permanent access (anonymous -> real account) ---------- */
+function showUpgradeModal(){
+  document.getElementById('upgrade-email').value = '';
+  document.getElementById('upgrade-password').value = '';
+  document.getElementById('upgrade-error').textContent = '';
+  document.getElementById('upgrade-modal').classList.remove('hidden');
+}
+function closeUpgradeModal(){
+  document.getElementById('upgrade-modal').classList.add('hidden');
+}
+async function handleUpgradeAccount(btn){
+  const email = document.getElementById('upgrade-email').value.trim();
+  const password = document.getElementById('upgrade-password').value;
+  const errEl = document.getElementById('upgrade-error');
+  errEl.textContent = '';
+  if(!email || !password || password.length < 6){
+    errEl.textContent = 'נא למלא מייל וסיסמה (לפחות 6 תווים)';
+    return;
+  }
+  if(btn) btn.disabled = true;
+  try{
+    const { data, error } = await sb.auth.updateUser({ email, password, data: { password_set: true } });
+    if(error){
+      errEl.textContent = translateAuthError(error);
+      return;
+    }
+    currentUser = data.user;
+    const saveBtn = document.getElementById('save-access-btn');
+    if(saveBtn) saveBtn.style.display = 'none';
+    closeUpgradeModal();
+  } finally {
+    if(btn) btn.disabled = false;
+  }
 }
 
 async function checkUnlocked(){
@@ -1246,9 +1324,14 @@ async function init(){
   const { data: { session } } = await sb.auth.getSession();
   if(session){
     await onLoggedIn(session.user);
-  } else {
-    showView('auth');
+    return;
   }
+  const giftCode = params.get('gift');
+  if(giftCode){
+    await handleGiftEntry(giftCode);
+    return;
+  }
+  showView('auth');
 }
 init();
 </script>
