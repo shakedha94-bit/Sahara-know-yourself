@@ -76,7 +76,7 @@
     50%{ transform:translateY(-6px); opacity:1; }
     100%{ transform:translateY(6px); opacity:0.92; }
   }
-  .welcome-actions{ display:flex; flex-direction:column; gap:12px; width:100%; max-width:280px; margin-top:6px; }
+  .welcome-actions{ display:flex; flex-direction:column; gap:12px; width:100%; max-width:280px; margin:6px auto 0; }
   .progress-hint{ font-size:12.5px; opacity:0.75; margin-top:2px; }
 
   /* ---------- menu ---------- */
@@ -400,6 +400,17 @@ src="https://www.facebook.com/tr?id=2132119363993562&ev=PageView&noscript=1"
     <p class="privacy-note">עדיין לא רכשת? אפשר לרכוש ב-<br><a href="https://morning-shops.com/SAHARA" target="_blank" rel="noopener" style="color:var(--cream);"><bdi>morning-shops.com/SAHARA</bdi></a></p>
   </div>
 
+  <!-- CYCLE CHOICE (repeat purchase) -->
+  <div id="view-cycle-choice" class="hidden">
+    <div class="brandmark" style="margin-top:10px;"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="#FFF8EA"/></svg><span>סַהֲרָה</span></div>
+    <h1 class="title" style="font-size:28px; margin-top:6px;">שוב שלום</h1>
+    <p class="tagline" style="margin-bottom:20px;">ראינו שאת חוזרת לתהליך. איך תרצי להמשיך הפעם?</p>
+    <div class="welcome-actions" style="gap:12px;">
+      <button class="btn btn-primary" id="cycle-continue-btn" onclick="handleContinueCycle()">להמשיך מאיפה שכתבתי</button>
+      <button class="btn btn-ghost" id="cycle-fresh-btn" onclick="handleFreshCycle()">להתחיל תהליך חדש</button>
+    </div>
+  </div>
+
   <!-- WELCOME -->
   <div id="view-welcome" class="hidden">
     <svg class="moon-hero" viewBox="0 0 100 100">
@@ -588,6 +599,8 @@ let currentQIdx = 0;
 let saveTimer = null;
 let currentUser = null;
 let authMode = 'pay';
+let currentCycle = 1;
+let pendingCycle = null;
 
 function qKey(ci, qi){ return CHAPTERS[ci].id + ':' + qi; }
 
@@ -607,9 +620,20 @@ function chapterAnsweredCount(ci){
   return n;
 }
 
+async function loadCycleInfo(){
+  currentCycle = 1;
+  pendingCycle = null;
+  const { data, error } = await sb.from('profiles').select('current_cycle,pending_cycle').eq('id', currentUser.id).maybeSingle();
+  if(error){ console.error('load cycle failed', error); return; }
+  if(data){
+    currentCycle = data.current_cycle || 1;
+    pendingCycle = data.pending_cycle ?? null;
+  }
+}
+
 async function loadAnswersFromDB(){
   answers = {};
-  const { data, error } = await sb.from('answers').select('chapter_id,question_index,answer_text');
+  const { data, error } = await sb.from('answers').select('chapter_id,question_index,answer_text').eq('cycle', currentCycle);
   if(error){ console.error('load failed', error); return; }
   data.forEach(row=>{
     answers[row.chapter_id + ':' + row.question_index] = row.answer_text;
@@ -620,11 +644,12 @@ async function loadAnswersFromDB(){
 async function saveAnswerToDB(chapterId, qIndex, text){
   const { error } = await sb.from('answers').upsert({
     user_id: currentUser.id,
+    cycle: currentCycle,
     chapter_id: chapterId,
     question_index: qIndex,
     answer_text: text,
     updated_at: new Date().toISOString()
-  }, { onConflict: 'user_id,chapter_id,question_index' });
+  }, { onConflict: 'user_id,cycle,chapter_id,question_index' });
   return error;
 }
 
@@ -754,8 +779,37 @@ async function continueAfterLogin(user){
     showView('gate');
     return;
   }
+  await loadCycleInfo();
+  if(pendingCycle && pendingCycle !== currentCycle){
+    showView('cycle-choice');
+    return;
+  }
   await loadAnswersFromDB();
   showView('welcome');
+}
+
+/* ---------- repeat-purchase cycle choice ---------- */
+async function finishCycleChoice(choice){
+  const { data, error } = await sb.functions.invoke('choose-cycle', { body: { choice } });
+  if(error || !data?.ok){
+    console.error('cycle choice failed', error);
+    alert('משהו השתבש, נסי שוב בעוד רגע.');
+    return;
+  }
+  currentCycle = data.cycle;
+  pendingCycle = null;
+  await loadAnswersFromDB();
+  showView('welcome');
+}
+async function handleContinueCycle(){
+  const btn = document.getElementById('cycle-continue-btn');
+  if(btn) btn.disabled = true;
+  try{ await finishCycleChoice('continue'); } finally { if(btn) btn.disabled = false; }
+}
+async function handleFreshCycle(){
+  const btn = document.getElementById('cycle-fresh-btn');
+  if(btn) btn.disabled = true;
+  try{ await finishCycleChoice('fresh'); } finally { if(btn) btn.disabled = false; }
 }
 
 /* ---------- gift links (?gift=CODE) ---------- */
@@ -839,6 +893,11 @@ async function handleRedeemCode(){
       errEl.textContent = 'הקוד לא תקין או שכבר נוצל. בדקי את הקוד או פני אלינו.';
       return;
     }
+    await loadCycleInfo();
+    if(pendingCycle && pendingCycle !== currentCycle){
+      showView('cycle-choice');
+      return;
+    }
     await loadAnswersFromDB();
     showView('welcome');
   } finally {
@@ -873,7 +932,7 @@ function suggestedChapterIdx(){
 }
 
 function showView(name){
-  ['auth','setpass','gate','welcome','menu','question','story'].forEach(v=>{
+  ['auth','setpass','gate','cycle-choice','welcome','menu','question','story'].forEach(v=>{
     document.getElementById('view-'+v).classList.toggle('hidden', v!==name);
   });
 }
@@ -887,7 +946,7 @@ function goToMenu(){
 let cachedStory = null;
 
 async function checkStoryExists(){
-  const { data } = await sb.from('stories').select('content').eq('user_id', currentUser.id).maybeSingle();
+  const { data } = await sb.from('stories').select('content').eq('user_id', currentUser.id).eq('cycle', currentCycle).maybeSingle();
   return data ? data.content : null;
 }
 
