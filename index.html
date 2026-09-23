@@ -59,6 +59,16 @@
   .btn-ghost:hover{ background: rgba(255,248,234,0.2); }
   .btn:disabled{ opacity:0.35; cursor:not-allowed; }
 
+  .cycle-option-row{ display:flex; align-items:center; gap:8px; }
+  .cycle-option-row .btn{ flex:1; }
+  .cycle-info-btn{
+    flex-shrink:0; width:28px; height:28px; border-radius:50%; border:1px solid rgba(255,248,234,0.5);
+    background:transparent; color:var(--cream); font-family:'Heebo'; font-weight:700; font-size:13px;
+    cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0;
+  }
+  .cycle-info-btn:hover{ background:rgba(255,248,234,0.15); }
+  .cycle-info-text{ font-size:12.5px; color:var(--cream); opacity:0.85; line-height:1.6; text-align:right; margin:6px 2px 0; }
+
   .hidden{ display:none !important; }
 
   /* ---------- welcome ---------- */
@@ -406,8 +416,20 @@ src="https://www.facebook.com/tr?id=2132119363993562&ev=PageView&noscript=1"
     <h1 class="title" style="font-size:28px; margin-top:6px;">שוב שלום</h1>
     <p class="tagline" style="margin-bottom:20px;">ראינו שאת חוזרת לתהליך. איך תרצי להמשיך הפעם?</p>
     <div class="welcome-actions" style="gap:12px;">
-      <button class="btn btn-primary" id="cycle-continue-btn" onclick="handleContinueCycle()">להמשיך מאיפה שכתבתי</button>
-      <button class="btn btn-ghost" id="cycle-fresh-btn" onclick="handleFreshCycle()">להתחיל תהליך חדש</button>
+      <div>
+        <div class="cycle-option-row">
+          <button class="btn btn-primary" id="cycle-continue-btn" onclick="handleContinueCycle()">להמשיך מאיפה שכתבתי</button>
+          <button class="cycle-info-btn" type="button" onclick="toggleCycleInfo('continue')" aria-label="הסבר">?</button>
+        </div>
+        <p class="cycle-info-text hidden" id="cycle-info-continue">כל התשובות שלך מהפעם הקודמת נשארות - את יכולה להוסיף, למחוק, לשנות, ולייצר סיפור חדש משלך.</p>
+      </div>
+      <div>
+        <div class="cycle-option-row">
+          <button class="btn btn-ghost" id="cycle-fresh-btn" onclick="handleFreshCycle()">להתחיל תהליך חדש</button>
+          <button class="cycle-info-btn" type="button" onclick="toggleCycleInfo('fresh')" aria-label="הסבר">?</button>
+        </div>
+        <p class="cycle-info-text hidden" id="cycle-info-fresh">כל התשובות מהפעם הקודמת נמחקות, ואת מתחילה את המסע שלך מהתחלה - להכיר את מי שאת היום.</p>
+      </div>
     </div>
   </div>
 
@@ -789,6 +811,9 @@ async function continueAfterLogin(user){
 }
 
 /* ---------- repeat-purchase cycle choice ---------- */
+function toggleCycleInfo(which){
+  document.getElementById('cycle-info-' + which).classList.toggle('hidden');
+}
 async function finishCycleChoice(choice){
   const { data, error } = await sb.functions.invoke('choose-cycle', { body: { choice } });
   if(error || !data?.ok){
