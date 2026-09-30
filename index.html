@@ -388,7 +388,7 @@ src="https://www.facebook.com/tr?id=2132119363993562&ev=PageView&noscript=1"
   <div id="view-request-otp" class="hidden">
     <div class="brandmark" style="margin-top:10px;"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="#FFF8EA"/></svg><span>סַהֲרָה</span></div>
     <h1 class="title" style="font-size:30px; margin-top:6px;">איפוס סיסמה</h1>
-    <p class="tagline" style="margin-bottom:20px;">הזיני את כתובת המייל שלך ונשלח אליה קוד בן 6 ספרות.</p>
+    <p class="tagline" style="margin-bottom:20px;">הזיני את כתובת המייל שלך ונשלח אליה קוד לאיפוס הסיסמה.</p>
     <div class="auth-card">
       <input id="forgot-email" type="email" placeholder="אימייל" autocomplete="email">
       <div class="auth-error" id="forgot-email-error"></div>
@@ -401,9 +401,9 @@ src="https://www.facebook.com/tr?id=2132119363993562&ev=PageView&noscript=1"
   <div id="view-verify-otp" class="hidden">
     <div class="brandmark" style="margin-top:10px;"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="#FFF8EA"/></svg><span>סַהֲרָה</span></div>
     <h1 class="title" style="font-size:30px; margin-top:6px;">בדקי את המייל שלך</h1>
-    <p class="tagline" style="margin-bottom:20px;">שלחנו קוד בן 6 ספרות אל <strong id="otp-target-email"></strong>. הזיני אותו כאן כדי לבחור סיסמה חדשה.</p>
+    <p class="tagline" style="margin-bottom:20px;">שלחנו קוד אל <strong id="otp-target-email"></strong>. הזיני אותו כאן כדי לבחור סיסמה חדשה.</p>
     <div class="auth-card">
-      <input id="otp-code" type="text" inputmode="numeric" maxlength="6" placeholder="קוד בן 6 ספרות" autocomplete="one-time-code">
+      <input id="otp-code" type="text" inputmode="numeric" maxlength="12" placeholder="הקוד מהמייל" autocomplete="one-time-code">
       <div class="auth-error" id="otp-error"></div>
       <button class="btn btn-primary" id="otp-submit" onclick="handleVerifyOtp()">אימות</button>
     </div>
