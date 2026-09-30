@@ -384,6 +384,19 @@ src="https://www.facebook.com/tr?id=2132119363993562&ev=PageView&noscript=1"
     </div>
   </div>
 
+  <!-- VERIFY RECOVERY CODE -->
+  <div id="view-verify-otp" class="hidden">
+    <div class="brandmark" style="margin-top:10px;"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="#FFF8EA"/></svg><span>סַהֲרָה</span></div>
+    <h1 class="title" style="font-size:30px; margin-top:6px;">בדקי את המייל שלך</h1>
+    <p class="tagline" style="margin-bottom:20px;">שלחנו לך קוד בן 6 ספרות. הזיני אותו כאן כדי לבחור סיסמה חדשה.</p>
+    <div class="auth-card">
+      <input id="otp-code" type="text" inputmode="numeric" maxlength="6" placeholder="קוד בן 6 ספרות" autocomplete="one-time-code">
+      <div class="auth-error" id="otp-error"></div>
+      <button class="btn btn-primary" id="otp-submit" onclick="handleVerifyOtp()">אימות</button>
+    </div>
+    <button class="auth-switch-link" onclick="showView('auth')">חזרה להתחברות</button>
+  </div>
+
   <!-- SET PASSWORD (first login after payment) -->
   <div id="view-setpass" class="hidden">
     <div class="brandmark" style="margin-top:10px;"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="#FFF8EA"/></svg><span>סַהֲרָה</span></div>
@@ -621,6 +634,7 @@ let currentQIdx = 0;
 let saveTimer = null;
 let currentUser = null;
 let authMode = 'pay';
+let recoveryEmail = '';
 let currentCycle = 1;
 let pendingCycle = null;
 
@@ -754,9 +768,34 @@ async function handleForgotPassword(){
   try{
     const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
     if(error){ errEl.textContent = translateAuthError(error); return; }
-    infoEl.textContent = 'נשלח מייל לאיפוס סיסמה - בדקי את תיבת הדואר שלך.';
+    recoveryEmail = email;
+    document.getElementById('otp-code').value = '';
+    document.getElementById('otp-error').textContent = '';
+    showView('verify-otp');
   } finally {
     link.disabled = false;
+  }
+}
+
+async function handleVerifyOtp(){
+  const code = document.getElementById('otp-code').value.trim();
+  const errEl = document.getElementById('otp-error');
+  errEl.textContent = '';
+  if(!code){ errEl.textContent = 'נא להזין את הקוד שקיבלת במייל'; return; }
+  const btn = document.getElementById('otp-submit');
+  btn.disabled = true;
+  try{
+    const { data, error } = await sb.auth.verifyOtp({ email: recoveryEmail, token: code, type: 'recovery' });
+    if(error || !data?.session){
+      errEl.textContent = 'הקוד שגוי או שפג תוקפו. נסי שוב או בקשי קוד חדש.';
+      return;
+    }
+    currentUser = data.user;
+    document.getElementById('setpass-password').value = '';
+    document.getElementById('setpass-error').textContent = '';
+    showView('setpass');
+  } finally {
+    btn.disabled = false;
   }
 }
 
@@ -957,7 +996,7 @@ function suggestedChapterIdx(){
 }
 
 function showView(name){
-  ['auth','setpass','gate','cycle-choice','welcome','menu','question','story'].forEach(v=>{
+  ['auth','verify-otp','setpass','gate','cycle-choice','welcome','menu','question','story'].forEach(v=>{
     document.getElementById('view-'+v).classList.toggle('hidden', v!==name);
   });
 }
