@@ -793,7 +793,7 @@ async function handleSendRecoveryCode(){
     document.getElementById('otp-code').value = '';
     document.getElementById('otp-error').textContent = '';
     showView('verify-otp');
-    startResendCooldown(45);
+    startResendCooldown(60);
   } finally {
     btn.disabled = false;
   }
@@ -827,7 +827,7 @@ async function handleResendCode(){
   try{
     const { error } = await sb.auth.resetPasswordForEmail(recoveryEmail, { redirectTo: window.location.origin });
     if(error){ errEl.textContent = translateAuthError(error); btn.disabled = false; return; }
-    startResendCooldown(45);
+    startResendCooldown(60);
   } catch(e){
     errEl.textContent = 'משהו השתבש, נסי שוב בעוד רגע.';
     btn.disabled = false;
