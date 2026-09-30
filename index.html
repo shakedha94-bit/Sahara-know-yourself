@@ -196,7 +196,7 @@
   .age-badge{ position:absolute; top:16px; right:16px; z-index:5; font-size:11px; color:var(--cream); opacity:0.6; }
 
   /* ---------- auth ---------- */
-  #view-auth, #view-gate, #view-setpass{ flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:0; text-align:center; }
+  #view-auth, #view-gate, #view-setpass, #view-request-otp, #view-verify-otp{ flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:0; text-align:center; }
   .auth-card{ width:100%; max-width:320px; display:flex; flex-direction:column; gap:12px; margin-top:6px; }
   .auth-card input{
     width:100%; background: var(--cream); color: var(--ink); border:none; border-radius:14px;
@@ -407,7 +407,10 @@ src="https://www.facebook.com/tr?id=2132119363993562&ev=PageView&noscript=1"
       <div class="auth-error" id="otp-error"></div>
       <button class="btn btn-primary" id="otp-submit" onclick="handleVerifyOtp()">אימות</button>
     </div>
-    <button class="auth-switch-link" onclick="showView('request-otp')">לא קיבלתי קוד / כתובת שגויה</button>
+    <div style="display:flex; flex-direction:column; gap:8px; margin-top:16px; align-items:center;">
+      <button class="auth-switch-link" id="resend-code-btn" onclick="handleResendCode()" style="margin-top:0;">לא קיבלת קוד? שלחי שוב</button>
+      <button class="auth-switch-link" onclick="showView('request-otp')" style="margin-top:0;">כתובת שגויה? לשנות מייל</button>
+    </div>
   </div>
 
   <!-- SET PASSWORD (first login after payment) -->
@@ -790,7 +793,43 @@ async function handleSendRecoveryCode(){
     document.getElementById('otp-code').value = '';
     document.getElementById('otp-error').textContent = '';
     showView('verify-otp');
+    startResendCooldown(45);
   } finally {
+    btn.disabled = false;
+  }
+}
+
+let resendTimer = null;
+function startResendCooldown(seconds){
+  const btn = document.getElementById('resend-code-btn');
+  if(!btn) return;
+  if(resendTimer) clearInterval(resendTimer);
+  let remaining = seconds;
+  btn.disabled = true;
+  btn.textContent = `שליחה חוזרת בעוד ${remaining} שניות`;
+  resendTimer = setInterval(() => {
+    remaining--;
+    if(remaining <= 0){
+      clearInterval(resendTimer);
+      btn.disabled = false;
+      btn.textContent = 'לא קיבלת קוד? שלחי שוב';
+    } else {
+      btn.textContent = `שליחה חוזרת בעוד ${remaining} שניות`;
+    }
+  }, 1000);
+}
+
+async function handleResendCode(){
+  const errEl = document.getElementById('otp-error');
+  errEl.textContent = '';
+  const btn = document.getElementById('resend-code-btn');
+  btn.disabled = true;
+  try{
+    const { error } = await sb.auth.resetPasswordForEmail(recoveryEmail, { redirectTo: window.location.origin });
+    if(error){ errEl.textContent = translateAuthError(error); btn.disabled = false; return; }
+    startResendCooldown(45);
+  } catch(e){
+    errEl.textContent = 'משהו השתבש, נסי שוב בעוד רגע.';
     btn.disabled = false;
   }
 }
